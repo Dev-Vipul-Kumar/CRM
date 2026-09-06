@@ -1,0 +1,645 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ContractFlow — Smart Contract Management</title>
+  <meta name="description" content="ContractFlow is a universal, role-based Contract Management System. Manage the complete contract lifecycle — from draft to digital signature — in one secure platform.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+</head>
+<body>
+
+<!-- Particle canvas -->
+<canvas id="particles-canvas"></canvas>
+<!-- Cursor glow -->
+<div class="cursor-glow" id="cursor-glow"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════════════════════════ -->
+<nav class="lp-nav" id="lp-nav">
+  <div class="inner">
+
+    <a href="{% url 'accounts:landing' %}" class="lp-logo">
+      <!-- Animated SVG logo mark -->
+      <div class="lp-logo-mark">
+        <svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#6366f1"/>
+              <stop offset="100%" stop-color="#8b5cf6"/>
+            </linearGradient>
+            <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#06b6d4"/>
+              <stop offset="100%" stop-color="#6366f1"/>
+            </linearGradient>
+          </defs>
+          <rect width="42" height="42" rx="12" fill="url(#lg1)"/>
+          <rect x="10" y="12" width="22" height="3" rx="1.5" fill="white" opacity=".9"/>
+          <rect x="10" y="19" width="16" height="3" rx="1.5" fill="white" opacity=".7"/>
+          <rect x="10" y="26" width="19" height="3" rx="1.5" fill="white" opacity=".5"/>
+          <circle cx="34" cy="28" r="7" fill="url(#lg2)"/>
+          <path d="M31 28l2 2 4-4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="lp-logo-text">
+        <div class="lp-logo-name">ContractFlow</div>
+        <div class="lp-logo-sub">Contract Management Platform</div>
+      </div>
+    </a>
+
+    <ul class="lp-nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#workflow">How it Works</a></li>
+      <li><a href="#roles">Roles</a></li>
+    </ul>
+
+    <a href="{% url 'accounts:login' %}" class="lp-signin-btn">
+      <i class="bi bi-box-arrow-in-right"></i>
+      Sign In
+    </a>
+
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════════════════════ -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+
+  <div class="hero-inner">
+
+    <div class="hero-pill">
+      <span class="dot"></span>
+      The Modern Way to Manage Contracts
+    </div>
+
+    <h1>
+      Every Contract.<br>
+      <span class="grad-text">Perfectly Managed.</span>
+    </h1>
+
+    <p class="hero-sub">
+      ContractFlow gives your organisation a centralised, role-based platform to handle the complete contract lifecycle — from creation and approval to digital signature and renewal alerts.
+    </p>
+
+    <div class="hero-btns">
+      <a href="{% url 'accounts:login' %}" class="btn-primary-glow">
+        <i class="bi bi-box-arrow-in-right"></i>
+        Sign In to Dashboard
+      </a>
+      <a href="#features" class="btn-outline-glow">
+        <i class="bi bi-play-circle"></i>
+        Explore Features
+      </a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num"><span class="count" data-target="12">0</span>+</div>
+        <div class="hero-stat-label">Contract Statuses</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num"><span class="count" data-target="3">0</span></div>
+        <div class="hero-stat-label">Access Roles</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num"><span class="count" data-target="100">0</span>%</div>
+        <div class="hero-stat-label">Digital Workflow</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">360°</div>
+        <div class="hero-stat-label">Audit Trail</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     TICKER
+═══════════════════════════════════════════════════════════ -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    {% with items="Contract Creation,Version Control,Approval Workflow,Digital Signatures,Renewal Alerts,Audit Trail,Role Dashboards,Expiry Monitoring,CSV Reports,Department Management,Assignment Control,Notification Centre" %}
+    {% for item in items.split %}
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>{{ item }}</span>
+    {% endfor %}
+    {% endwith %}
+    <!-- Duplicate for seamless loop -->
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>Contract Creation</span>
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>Version Control</span>
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>Approval Workflow</span>
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>Digital Signatures</span>
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>Renewal Alerts</span>
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>Audit Trail</span>
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>Role Dashboards</span>
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>Expiry Monitoring</span>
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>CSV Reports</span>
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>Department Management</span>
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>Assignment Control</span>
+    <span class="ticker-item"><i class="bi bi-check-circle-fill"></i>Notification Centre</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     FEATURES — BENTO GRID
+═══════════════════════════════════════════════════════════ -->
+<section class="features-section" id="features">
+  <div class="section-inner">
+
+    <div class="section-header reveal">
+      <div class="s-eyebrow"><i class="bi bi-stars"></i> Features</div>
+      <h2 class="s-title">Everything in One Platform</h2>
+      <p class="s-sub">From the moment a contract is drafted to the day it's signed, every step lives inside ContractFlow.</p>
+    </div>
+
+    <div class="bento-grid">
+
+      <!-- Card 1 — wide -->
+      <div class="bento-card wide reveal">
+        <div class="card-glow" style="background:radial-gradient(circle,rgba(99,102,241,.7),transparent);"></div>
+        <div class="bento-icon" style="background:rgba(99,102,241,.15);">
+          <i class="bi bi-file-earmark-text" style="color:#a5b4fc;"></i>
+        </div>
+        <div class="bento-title">Contract Lifecycle Management</div>
+        <div class="bento-desc">Create and track contracts with auto-generated unique numbers (CTR-YYYY-XXXX). Manage vendor details, dates, values and all metadata through a controlled status pipeline — from Draft right through to Active, Renewal or Archive.</div>
+        <div class="bento-demo" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem;">
+          <span style="background:rgba(99,102,241,.15);color:#a5b4fc;padding:.2rem .7rem;border-radius:20px;font-size:.72rem;font-weight:700;">Draft</span>
+          <span style="color:#4b5563;font-size:.7rem;align-self:center;">→</span>
+          <span style="background:rgba(6,182,212,.15);color:#67e8f9;padding:.2rem .7rem;border-radius:20px;font-size:.72rem;font-weight:700;">Review</span>
+          <span style="color:#4b5563;font-size:.7rem;align-self:center;">→</span>
+          <span style="background:rgba(245,158,11,.15);color:#fcd34d;padding:.2rem .7rem;border-radius:20px;font-size:.72rem;font-weight:700;">Approval</span>
+          <span style="color:#4b5563;font-size:.7rem;align-self:center;">→</span>
+          <span style="background:rgba(139,92,246,.15);color:#c4b5fd;padding:.2rem .7rem;border-radius:20px;font-size:.72rem;font-weight:700;">Signature</span>
+          <span style="color:#4b5563;font-size:.7rem;align-self:center;">→</span>
+          <span style="background:rgba(16,185,129,.15);color:#6ee7b7;padding:.2rem .7rem;border-radius:20px;font-size:.72rem;font-weight:700;">Active</span>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="bento-card reveal reveal-delay-1">
+        <div class="card-glow" style="background:radial-gradient(circle,rgba(16,185,129,.7),transparent);"></div>
+        <div class="bento-icon" style="background:rgba(16,185,129,.12);">
+          <i class="bi bi-clock-history" style="color:#6ee7b7;"></i>
+        </div>
+        <div class="bento-title">Version Control</div>
+        <div class="bento-desc">Every document upload creates a new version. Full history is preserved — previous revisions are never deleted. Download any version at any time.</div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="bento-card reveal reveal-delay-2">
+        <div class="card-glow" style="background:radial-gradient(circle,rgba(245,158,11,.6),transparent);"></div>
+        <div class="bento-icon" style="background:rgba(245,158,11,.12);">
+          <i class="bi bi-check2-circle" style="color:#fcd34d;"></i>
+        </div>
+        <div class="bento-title">Approval Workflow</div>
+        <div class="bento-desc">Structured review and approval pipeline — submit, review, approve, request changes or reject. Full comment and timestamp history preserved on every decision.</div>
+      </div>
+
+      <!-- Card 4 — tall -->
+      <div class="bento-card tall reveal reveal-delay-1">
+        <div class="card-glow" style="background:radial-gradient(circle,rgba(139,92,246,.8),transparent);"></div>
+        <div class="bento-icon" style="background:rgba(139,92,246,.14);">
+          <i class="bi bi-pen" style="color:#c4b5fd;"></i>
+        </div>
+        <div class="bento-title">Digital Signatures</div>
+        <div class="bento-desc">Canvas-based digital signature pad. Request signatures from specific users, capture drawn signatures, and record the signer's IP address and exact timestamp for each contract.</div>
+        <!-- Mini signature illustration -->
+        <div style="margin-top:1.5rem;border:1.5px dashed rgba(139,92,246,.35);border-radius:10px;padding:1.2rem;text-align:center;">
+          <svg width="120" height="50" viewBox="0 0 120 50" style="opacity:.5;">
+            <path d="M10 40 Q25 10 40 30 Q55 45 70 20 Q85 5 110 30" stroke="#c4b5fd" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </svg>
+          <div style="font-size:.7rem;color:rgba(196,181,253,.5);margin-top:.4rem;">Signature captured &amp; stored</div>
+        </div>
+        <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.4rem;">
+          <div style="display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:#8b8fad;">
+            <i class="bi bi-check-circle-fill" style="color:#10b981;"></i> IP address logged
+          </div>
+          <div style="display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:#8b8fad;">
+            <i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Timestamp recorded
+          </div>
+          <div style="display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:#8b8fad;">
+            <i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Signature data stored
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="bento-card reveal reveal-delay-2">
+        <div class="card-glow" style="background:radial-gradient(circle,rgba(239,68,68,.6),transparent);"></div>
+        <div class="bento-icon" style="background:rgba(239,68,68,.12);">
+          <i class="bi bi-bell-fill" style="color:#fca5a5;"></i>
+        </div>
+        <div class="bento-title">Renewal Alerts</div>
+        <div class="bento-desc">Automated expiry monitoring with configurable thresholds — 30-day warning, 15-day reminder, 7-day urgent, and critical alerts so no contract lapses unnoticed.</div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="bento-card reveal reveal-delay-3">
+        <div class="card-glow" style="background:radial-gradient(circle,rgba(6,182,212,.7),transparent);"></div>
+        <div class="bento-icon" style="background:rgba(6,182,212,.12);">
+          <i class="bi bi-shield-check" style="color:#67e8f9;"></i>
+        </div>
+        <div class="bento-title">360° Audit Trail</div>
+        <div class="bento-desc">Every action — login, create, edit, approve, sign, download — is recorded with the acting user, timestamp and IP address. Full contract activity timeline available.</div>
+      </div>
+
+      <!-- Card 7 -->
+      <div class="bento-card reveal reveal-delay-2">
+        <div class="card-glow" style="background:radial-gradient(circle,rgba(16,185,129,.6),transparent);"></div>
+        <div class="bento-icon" style="background:rgba(16,185,129,.12);">
+          <i class="bi bi-speedometer2" style="color:#6ee7b7;"></i>
+        </div>
+        <div class="bento-title">Role-Based Dashboards</div>
+        <div class="bento-desc">Separate dashboards for Admin, Manager and Employee — each populated with live database statistics specific to that role. No hard-coded numbers.</div>
+      </div>
+
+      <!-- Card 8 — wide -->
+      <div class="bento-card wide reveal reveal-delay-3">
+        <div class="card-glow" style="background:radial-gradient(circle,rgba(245,158,11,.6),transparent);"></div>
+        <div class="bento-icon" style="background:rgba(245,158,11,.12);">
+          <i class="bi bi-bar-chart-line" style="color:#fcd34d;"></i>
+        </div>
+        <div class="bento-title">Reports & CSV Export</div>
+        <div class="bento-desc">Summary reports by status, department and category. Filter by date range or contract type. Export any filtered dataset to CSV instantly for offline analysis.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     STATS COUNTER
+═══════════════════════════════════════════════════════════ -->
+<section class="stats-section" id="stats">
+  <div class="section-inner">
+    <div class="stats-grid">
+      <div class="stat-counter-card reveal">
+        <div class="stat-counter-num"><span class="count" data-target="12">0</span>+</div>
+        <div class="stat-counter-label">Contract Statuses</div>
+      </div>
+      <div class="stat-counter-card reveal reveal-delay-1">
+        <div class="stat-counter-num"><span class="count" data-target="3">0</span></div>
+        <div class="stat-counter-label">User Roles</div>
+      </div>
+      <div class="stat-counter-card reveal reveal-delay-2">
+        <div class="stat-counter-num"><span class="count" data-target="360">0</span>°</div>
+        <div class="stat-counter-label">Audit Coverage</div>
+      </div>
+      <div class="stat-counter-card reveal reveal-delay-3">
+        <div class="stat-counter-num"><span class="count" data-target="100">0</span>%</div>
+        <div class="stat-counter-label">Digital Workflow</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     WORKFLOW
+═══════════════════════════════════════════════════════════ -->
+<section class="workflow-section" id="workflow">
+  <div class="section-inner">
+
+    <div class="section-header reveal">
+      <div class="s-eyebrow"><i class="bi bi-diagram-3"></i> Workflow</div>
+      <h2 class="s-title">From Draft to Active<br>in Five Steps</h2>
+      <p class="s-sub">Every stage is tracked. Every transition is controlled by business rules.</p>
+    </div>
+
+    <div class="workflow-grid">
+
+      <!-- Steps -->
+      <div class="workflow-steps reveal">
+        <div class="wf-step">
+          <div class="wf-num">1</div>
+          <div class="wf-content">
+            <h4>Create Contract</h4>
+            <p>Draft a contract with all details — vendor, dates, value — and upload the document as Version 1.</p>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-num">2</div>
+          <div class="wf-content">
+            <h4>Submit for Approval</h4>
+            <p>A manager submits the contract for review. Authorised reviewers receive an instant in-app notification.</p>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-num">3</div>
+          <div class="wf-content">
+            <h4>Review & Approve</h4>
+            <p>The reviewer approves, rejects or requests changes. Full comment and timestamp are recorded on every decision.</p>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-num">4</div>
+          <div class="wf-content">
+            <h4>Digital Signature</h4>
+            <p>Signature requests are sent to designated signers. The canvas pad captures and securely stores each signature.</p>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-num">5</div>
+          <div class="wf-content">
+            <h4>Active & Auto-Monitored</h4>
+            <p>The contract goes live. Renewal reminders fire automatically at 30, 15 and 7 days before expiry.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Animated pipeline card -->
+      <div class="pipeline-card reveal reveal-delay-2">
+        <div class="pipeline-label">Live Status Pipeline</div>
+        <div class="pipeline-stages">
+          <div class="pipe-stage">
+            <div class="pipe-dot pipe-info"></div> Draft
+          </div>
+          <div class="pipe-arrow" style="padding-left:1.2rem;">↓</div>
+          <div class="pipe-stage">
+            <div class="pipe-dot pipe-info"></div> Under Review
+          </div>
+          <div class="pipe-arrow" style="padding-left:1.2rem;">↓</div>
+          <div class="pipe-stage">
+            <div class="pipe-dot pipe-warning"></div> Pending Approval
+          </div>
+          <div class="pipe-arrow" style="padding-left:1.2rem;">↓</div>
+          <div class="pipe-stage">
+            <div class="pipe-dot" style="background:#6366f1;box-shadow:0 0 6px rgba(99,102,241,.7);"></div> Approved
+          </div>
+          <div class="pipe-arrow" style="padding-left:1.2rem;">↓</div>
+          <div class="pipe-stage">
+            <div class="pipe-dot pipe-warning"></div> Pending Signature
+          </div>
+          <div class="pipe-arrow" style="padding-left:1.2rem;">↓</div>
+          <div class="pipe-stage">
+            <div class="pipe-dot pipe-active"></div> Active
+          </div>
+          <div class="pipe-arrow" style="padding-left:1.2rem;">↓</div>
+          <div class="pipe-stage">
+            <div class="pipe-dot pipe-warning"></div> Expiring Soon
+          </div>
+          <div class="pipe-arrow" style="padding-left:1.2rem;">↓ &nbsp; ↘</div>
+          <div style="display:flex;gap:.6rem;">
+            <div class="pipe-stage" style="flex:1;">
+              <div class="pipe-dot pipe-active"></div> Renewed
+            </div>
+            <div class="pipe-stage" style="flex:1;">
+              <div class="pipe-dot pipe-danger"></div> Expired
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     ROLES
+═══════════════════════════════════════════════════════════ -->
+<section class="roles-section" id="roles">
+  <div class="section-inner">
+
+    <div class="section-header reveal">
+      <div class="s-eyebrow"><i class="bi bi-people"></i> Access Control</div>
+      <h2 class="s-title">Three Roles, Total Control</h2>
+      <p class="s-sub">Server-side enforcement on every URL. Hiding a button is not enough — every action is validated at the backend.</p>
+    </div>
+
+    <div class="roles-grid">
+
+      <!-- Admin -->
+      <div class="role-card featured reveal">
+        <div class="blob"></div>
+        <div class="role-chip">Full Access</div>
+        <span class="role-emoji">🛡️</span>
+        <div class="role-title">Administrator</div>
+        <div class="role-desc">Complete system control — manage all users, roles, departments, and settings through the dedicated Admin Portal.</div>
+        <ul class="role-perms">
+          <li>Create and manage all users</li>
+          <li>View and control all contracts</li>
+          <li>Manage departments &amp; categories</li>
+          <li>Full audit log access</li>
+          <li>Archive and delete contracts</li>
+          <li>Generate reports &amp; exports</li>
+        </ul>
+      </div>
+
+      <!-- Manager -->
+      <div class="role-card reveal reveal-delay-1">
+        <div class="blob"></div>
+        <div class="role-chip" style="background:rgba(139,92,246,.2);color:#c4b5fd;">Operations</div>
+        <span class="role-emoji">📋</span>
+        <div class="role-title">Manager</div>
+        <div class="role-desc">Operational access — create, manage and approve contracts within their department scope.</div>
+        <ul class="role-perms">
+          <li>Create and edit contracts</li>
+          <li>Submit for approval</li>
+          <li>Approve or reject contracts</li>
+          <li>Request digital signatures</li>
+          <li>Upload new document versions</li>
+          <li>View reports and alerts</li>
+        </ul>
+      </div>
+
+      <!-- Employee -->
+      <div class="role-card reveal reveal-delay-2">
+        <div class="blob"></div>
+        <div class="role-chip" style="background:rgba(6,182,212,.15);color:#67e8f9;">Limited Access</div>
+        <span class="role-emoji">👤</span>
+        <div class="role-title">Employee</div>
+        <div class="role-desc">View assigned contracts, participate in signing workflows, and receive renewal notifications.</div>
+        <ul class="role-perms">
+          <li>View assigned contracts only</li>
+          <li>Download permitted documents</li>
+          <li>Sign contracts when requested</li>
+          <li>Receive renewal notifications</li>
+          <li>View contract status &amp; expiry</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     CTA
+═══════════════════════════════════════════════════════════ -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <h2 class="cta-title">Ready to Take Control<br>of Your Contracts?</h2>
+    <p class="cta-sub">Sign in to your account and manage your entire contract lifecycle from one unified platform.</p>
+    <a href="{% url 'accounts:login' %}" class="btn-primary-glow" style="display:inline-flex;">
+      <i class="bi bi-box-arrow-in-right"></i>
+      Sign In Now
+    </a>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════════════════ -->
+<footer class="lp-footer">
+  <div class="footer-inner">
+    <p>&copy; {% now "Y" %} ContractFlow — Smart Contract Management. All rights reserved.</p>
+    <ul class="footer-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#workflow">Workflow</a></li>
+      <li><a href="#roles">Roles</a></li>
+      <li><a href="{% url 'accounts:login' %}">Sign In</a></li>
+    </ul>
+  </div>
+</footer>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════════════════════ -->
+<script>
+/* ── Navbar scroll effect ──────────────────────────────────── */
+const nav = document.getElementById('lp-nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+}, { passive: true });
+
+/* ── Cursor glow ───────────────────────────────────────────── */
+const glow = document.getElementById('cursor-glow');
+let mx = 0, my = 0, cx = 0, cy = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
+(function animGlow() {
+  cx += (mx - cx) * 0.1;
+  cy += (my - cy) * 0.1;
+  glow.style.left = cx + 'px';
+  glow.style.top  = cy + 'px';
+  requestAnimationFrame(animGlow);
+})();
+
+/* ── Particle system ───────────────────────────────────────── */
+(function() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, particles = [];
+  const N = 80;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  class Particle {
+    constructor() { this.reset(true); }
+    reset(init) {
+      this.x  = Math.random() * W;
+      this.y  = init ? Math.random() * H : H + 10;
+      this.r  = Math.random() * 1.8 + 0.4;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = -(Math.random() * 0.5 + 0.2);
+      this.alpha = Math.random() * 0.5 + 0.1;
+      this.hue  = Math.random() < 0.6 ? 240 : (Math.random() < 0.5 ? 270 : 190);
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.y < -10) this.reset(false);
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${this.hue},80%,70%,${this.alpha})`;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < N; i++) particles.push(new Particle());
+
+  function drawConnections() {
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const d  = Math.sqrt(dx*dx + dy*dy);
+        if (d < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(99,102,241,${(1 - d/120) * 0.12})`;
+          ctx.lineWidth   = 0.6;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  (function loop() {
+    ctx.clearRect(0, 0, W, H);
+    drawConnections();
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ── Scroll reveal ─────────────────────────────────────────── */
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in-view');
+      revealObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ── Counter animation ─────────────────────────────────────── */
+function animateCounter(el) {
+  const target  = parseInt(el.dataset.target, 10);
+  const dur     = 1800;
+  const start   = performance.now();
+  (function tick(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(ease * target);
+    if (p < 1) requestAnimationFrame(tick);
+  })(start);
+}
+
+const counterObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.count[data-target]').forEach(animateCounter);
+      counterObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.hero-stats, .stats-grid').forEach(el => counterObserver.observe(el));
+
+/* ── Smooth scroll ─────────────────────────────────────────── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+</script>
+
+</body>
+</html>

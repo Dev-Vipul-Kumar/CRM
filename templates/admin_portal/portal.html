@@ -1,0 +1,789 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal — CRM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="{% static 'css/admin_portal.css' %}" rel="stylesheet">
+</head>
+<body>
+<div class="ap-body">
+
+<!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+<aside class="ap-sidebar" id="ap-sidebar">
+
+  <a class="ap-brand" href="{% url 'accounts:admin_portal' %}">
+    <div class="ap-brand-icon">A</div>
+    <div>
+      <div class="ap-brand-text">Admin Portal</div>
+      <div class="ap-brand-sub">CRM Control Centre</div>
+    </div>
+  </a>
+
+  <nav class="ap-nav">
+
+    <span class="ap-nav-label">Overview</span>
+    <a class="ap-nav-link active" href="#overview" onclick="showSection('overview',this)">
+      <span class="ap-nav-icon"><i class="bi bi-speedometer2"></i></span> Dashboard
+    </a>
+
+    <span class="ap-nav-label">Users & Access</span>
+    <a class="ap-nav-link" href="#users" onclick="showSection('users',this)">
+      <span class="ap-nav-icon"><i class="bi bi-people"></i></span> Manage Users
+    </a>
+    <a class="ap-nav-link" href="#departments" onclick="showSection('departments',this)">
+      <span class="ap-nav-icon"><i class="bi bi-building"></i></span> Departments
+    </a>
+
+    <span class="ap-nav-label">Contracts</span>
+    <a class="ap-nav-link" href="#contracts" onclick="showSection('contracts',this)">
+      <span class="ap-nav-icon"><i class="bi bi-file-earmark-text"></i></span> All Contracts
+    </a>
+    <a class="ap-nav-link" href="#expiring" onclick="showSection('expiring',this)">
+      <span class="ap-nav-icon"><i class="bi bi-clock-history"></i></span> Expiring Soon
+      {% if contract_stats.expiring_soon > 0 %}
+      <span class="badge bg-warning ms-auto" style="font-size:.6rem;">{{ contract_stats.expiring_soon }}</span>
+      {% endif %}
+    </a>
+    <a class="ap-nav-link" href="#approvals" onclick="showSection('approvals',this)">
+      <span class="ap-nav-icon"><i class="bi bi-check2-circle"></i></span> Approvals
+    </a>
+    <a class="ap-nav-link" href="#signatures" onclick="showSection('signatures',this)">
+      <span class="ap-nav-icon"><i class="bi bi-pen"></i></span> Signatures
+    </a>
+
+    <span class="ap-nav-label">System</span>
+    <a class="ap-nav-link" href="#activity" onclick="showSection('activity',this)">
+      <span class="ap-nav-icon"><i class="bi bi-shield-check"></i></span> Audit Log
+    </a>
+
+    <span class="ap-nav-label">CRM</span>
+    <a class="ap-nav-link" href="{% url 'dashboard:index' %}">
+      <span class="ap-nav-icon"><i class="bi bi-arrow-left-circle"></i></span> Back to CRM
+    </a>
+    <a class="ap-nav-link" href="{% url 'contracts:contract_list' %}">
+      <span class="ap-nav-icon"><i class="bi bi-folder2-open"></i></span> Contracts Module
+    </a>
+    <a class="ap-nav-link" href="{% url 'reports:reports_index' %}">
+      <span class="ap-nav-icon"><i class="bi bi-bar-chart-line"></i></span> Reports
+    </a>
+    <a class="ap-nav-link" href="{% url 'audit:audit_list' %}">
+      <span class="ap-nav-icon"><i class="bi bi-journal-text"></i></span> Full Audit Trail
+    </a>
+
+  </nav>
+
+  <div class="ap-sidebar-footer">
+    <div class="ap-user-row">
+      <div class="ap-user-avatar">{{ request.user.username|first|upper }}</div>
+      <div>
+        <div class="ap-user-name">{{ request.user.full_name }}</div>
+        <div class="ap-user-role">Administrator</div>
+      </div>
+    </div>
+  </div>
+
+</aside>
+
+<!-- ═══════════════════════ MAIN ═══════════════════════════ -->
+<div class="ap-main">
+
+  <!-- Topbar -->
+  <header class="ap-topbar">
+    <button class="ap-topbar-btn outline d-md-none me-2" onclick="document.getElementById('ap-sidebar').classList.toggle('open')" style="padding:.4rem .6rem;">
+      <i class="bi bi-list"></i>
+    </button>
+    <span class="ap-topbar-title" id="ap-topbar-title">Dashboard</span>
+
+    <div class="ap-topbar-right">
+      {% if unread_count > 0 %}
+      <a href="{% url 'notifications:notification_list' %}" class="ap-topbar-btn outline" style="position:relative;">
+        <i class="bi bi-bell"></i>
+        <span style="position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:.6rem;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;">{{ unread_count }}</span>
+      </a>
+      {% endif %}
+      <a href="{% url 'accounts:portal_user_create' %}" class="ap-topbar-btn">
+        <i class="bi bi-person-plus"></i> Add User
+      </a>
+      <a href="{% url 'contracts:contract_create' %}" class="ap-topbar-btn" style="background:#16a34a;">
+        <i class="bi bi-plus-lg"></i> New Contract
+      </a>
+      <a href="{% url 'accounts:logout' %}" class="ap-logout-btn">
+        <i class="bi bi-box-arrow-right"></i> Logout
+      </a>
+    </div>
+  </header>
+
+  <!-- Django messages -->
+  {% if messages %}
+  <div class="px-4 pt-3">
+    {% for message in messages %}
+    <div class="ap-alert ap-alert-{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% elif message.tags == 'success' %}success{% else %}info{% endif %}">
+      <i class="bi bi-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="ap-content">
+
+    <!-- ═══════════ SECTION: OVERVIEW ═══════════ -->
+    <div id="sec-overview" class="ap-section">
+
+      <!-- Contract stats -->
+      <div class="ap-section-title">Contract Overview</div>
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="ap-stat">
+            <div class="ap-stat-icon blue"><i class="bi bi-file-earmark-text"></i></div>
+            <div><div class="ap-stat-val">{{ contract_stats.total }}</div><div class="ap-stat-label">Total Contracts</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="ap-stat">
+            <div class="ap-stat-icon green"><i class="bi bi-check-circle"></i></div>
+            <div><div class="ap-stat-val">{{ contract_stats.active }}</div><div class="ap-stat-label">Active</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="ap-stat">
+            <div class="ap-stat-icon yellow"><i class="bi bi-hourglass-split"></i></div>
+            <div><div class="ap-stat-val">{{ contract_stats.pending_approval }}</div><div class="ap-stat-label">Pending Approval</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="ap-stat">
+            <div class="ap-stat-icon orange"><i class="bi bi-clock-history"></i></div>
+            <div><div class="ap-stat-val">{{ contract_stats.expiring_soon }}</div><div class="ap-stat-label">Expiring Soon</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="ap-stat">
+            <div class="ap-stat-icon red"><i class="bi bi-x-circle"></i></div>
+            <div><div class="ap-stat-val">{{ contract_stats.expired }}</div><div class="ap-stat-label">Expired</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="ap-stat">
+            <div class="ap-stat-icon purple"><i class="bi bi-pen"></i></div>
+            <div><div class="ap-stat-val">{{ contract_stats.pending_signature }}</div><div class="ap-stat-label">Pending Signature</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="ap-stat">
+            <div class="ap-stat-icon indigo"><i class="bi bi-file-earmark"></i></div>
+            <div><div class="ap-stat-val">{{ contract_stats.draft }}</div><div class="ap-stat-label">Draft</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="ap-stat">
+            <div class="ap-stat-icon teal"><i class="bi bi-currency-rupee"></i></div>
+            <div>
+              <div class="ap-stat-val" style="font-size:1.2rem;">
+                ₹{% if contract_stats.total_value >= 100000 %}{{ contract_stats.total_value|floatformat:0 }}{% else %}{{ contract_stats.total_value|floatformat:2 }}{% endif %}
+              </div>
+              <div class="ap-stat-label">Total Contract Value</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User stats -->
+      <div class="ap-section-title">User Overview</div>
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="ap-stat">
+            <div class="ap-stat-icon blue"><i class="bi bi-people"></i></div>
+            <div><div class="ap-stat-val">{{ user_stats.total }}</div><div class="ap-stat-label">Total Users</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="ap-stat">
+            <div class="ap-stat-icon green"><i class="bi bi-person-check"></i></div>
+            <div><div class="ap-stat-val">{{ user_stats.active }}</div><div class="ap-stat-label">Active Users</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="ap-stat">
+            <div class="ap-stat-icon red"><i class="bi bi-person-x"></i></div>
+            <div><div class="ap-stat-val">{{ user_stats.inactive }}</div><div class="ap-stat-label">Inactive</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="ap-stat">
+            <div class="ap-stat-icon yellow"><i class="bi bi-person-exclamation"></i></div>
+            <div><div class="ap-stat-val">{{ user_stats.suspended }}</div><div class="ap-stat-label">Suspended</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="ap-section-title">Quick Actions</div>
+      <div class="ap-action-grid mb-4">
+        <a href="{% url 'accounts:portal_user_create' %}" class="ap-action-btn">
+          <div class="icon" style="background:rgba(167,139,250,.15);color:#a78bfa;"><i class="bi bi-person-plus"></i></div>
+          <span class="label">Add User</span>
+        </a>
+        <a href="{% url 'contracts:contract_create' %}" class="ap-action-btn">
+          <div class="icon" style="background:rgba(52,211,153,.12);color:#34d399;"><i class="bi bi-plus-circle"></i></div>
+          <span class="label">New Contract</span>
+        </a>
+        <a href="{% url 'accounts:portal_dept_create' %}" class="ap-action-btn">
+          <div class="icon" style="background:rgba(167,139,250,.15);color:#c4b5fd;"><i class="bi bi-building-add"></i></div>
+          <span class="label">Add Department</span>
+        </a>
+        <a href="{% url 'contracts:category_create' %}" class="ap-action-btn">
+          <div class="icon" style="background:rgba(251,146,60,.12);color:#fb923c;"><i class="bi bi-tags"></i></div>
+          <span class="label">Add Category</span>
+        </a>
+        <a href="{% url 'reports:export_csv' %}" class="ap-action-btn">
+          <div class="icon" style="background:rgba(52,211,153,.12);color:#34d399;"><i class="bi bi-download"></i></div>
+          <span class="label">Export CSV</span>
+        </a>
+        <a href="{% url 'audit:audit_list' %}" class="ap-action-btn">
+          <div class="icon" style="background:rgba(129,140,248,.15);color:#818cf8;"><i class="bi bi-journal-text"></i></div>
+          <span class="label">Full Audit Log</span>
+        </a>
+        <a href="{% url 'reports:reports_index' %}" class="ap-action-btn">
+          <div class="icon" style="background:rgba(251,191,36,.12);color:#fbbf24;"><i class="bi bi-bar-chart-line"></i></div>
+          <span class="label">Reports</span>
+        </a>
+        <a href="{% url 'notifications:notification_list' %}" class="ap-action-btn">
+          <div class="icon" style="background:rgba(248,113,113,.12);color:#f87171;"><i class="bi bi-bell"></i></div>
+          <span class="label">Notifications</span>
+        </a>
+      </div>
+
+      <!-- Two-column: Recent Contracts + Recent Activity -->
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="ap-card">
+            <div class="ap-card-header">
+              <span class="ap-card-title">Recent Contracts</span>
+              <a href="{% url 'contracts:contract_list' %}" class="ap-btn ap-btn-ghost ap-btn-sm">View All</a>
+            </div>
+            <div class="table-responsive">
+              <table class="ap-table">
+                <thead><tr><th>Number</th><th>Title</th><th>Status</th><th>Expiry</th><th></th></tr></thead>
+                <tbody>
+                  {% for c in recent_contracts %}
+                  <tr>
+                    <td><a href="{% url 'contracts:contract_detail' c.pk %}" style="color:#a78bfa;font-weight:600;text-decoration:none;">{{ c.contract_number }}</a></td>
+                    <td>{{ c.title|truncatechars:38 }}</td>
+                    <td>
+                      <span class="ap-badge ap-badge-{% if c.status == 'ACTIVE' %}active{% elif c.status == 'EXPIRED' %}inactive{% elif c.status == 'DRAFT' %}employee{% else %}manager{% endif %}">
+                        {{ c.get_status_display }}
+                      </span>
+                    </td>
+                    <td style="font-size:.78rem;">
+                      {% if c.days_until_expiry is not None %}
+                        {% if c.days_until_expiry < 0 %}<span style="color:#dc2626;">Expired</span>
+                        {% elif c.days_until_expiry <= 7 %}<span style="color:#dc2626;font-weight:700;">{{ c.days_until_expiry }}d</span>
+                        {% elif c.days_until_expiry <= 30 %}<span style="color:#fbbf24;font-weight:700;">{{ c.days_until_expiry }}d</span>
+                        {% else %}{{ c.end_date|date:"d M Y" }}
+                        {% endif %}
+                      {% else %}—{% endif %}
+                    </td>
+                    <td>
+                      <a href="{% url 'contracts:contract_edit' c.pk %}" class="ap-btn ap-btn-ghost ap-btn-sm"><i class="bi bi-pencil"></i></a>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr><td colspan="5" style="text-align:center;padding:2rem;color:#6b7a99;">No contracts yet.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="ap-card">
+            <div class="ap-card-header">
+              <span class="ap-card-title">Recent Activity</span>
+              <a href="{% url 'audit:audit_list' %}" class="ap-btn ap-btn-ghost ap-btn-sm">All Logs</a>
+            </div>
+            <div class="ap-card-body" style="max-height:360px;overflow-y:auto;">
+              <ul class="ap-timeline">
+                {% for log in recent_activities %}
+                <li class="ap-tl-item">
+                  <div class="ap-tl-dot"></div>
+                  <div class="ap-tl-content">
+                    <strong>{{ log.user.username|default:"System" }}</strong> — {{ log.description|truncatechars:65 }}
+                    <div class="ap-tl-time">{{ log.timestamp|date:"d M Y H:i" }}</div>
+                  </div>
+                </li>
+                {% empty %}
+                <li style="color:#6b7a99;font-size:.8rem;text-align:center;padding:1rem;">No activity yet.</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /#sec-overview -->
+
+
+    <!-- ═══════════ SECTION: USERS ═══════════════ -->
+    <div id="sec-users" class="ap-section" style="display:none;">
+
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="ap-section-title mb-0">Manage Users</div>
+        <a href="{% url 'accounts:portal_user_create' %}" class="ap-btn ap-btn-primary">
+          <i class="bi bi-person-plus"></i> Add User
+        </a>
+      </div>
+
+      <!-- Role breakdown -->
+      <div class="row g-3 mb-4">
+        <div class="col-4">
+          <div class="ap-stat">
+            <div class="ap-stat-icon blue"><i class="bi bi-shield-lock"></i></div>
+            <div><div class="ap-stat-val">{{ user_stats.admins }}</div><div class="ap-stat-label">Admins</div></div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="ap-stat">
+            <div class="ap-stat-icon indigo"><i class="bi bi-briefcase"></i></div>
+            <div><div class="ap-stat-val">{{ user_stats.managers }}</div><div class="ap-stat-label">Managers</div></div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="ap-stat">
+            <div class="ap-stat-icon teal"><i class="bi bi-person"></i></div>
+            <div><div class="ap-stat-val">{{ user_stats.employees }}</div><div class="ap-stat-label">Employees</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ap-card">
+        <div class="ap-card-header">
+          <span class="ap-card-title">All Users ({{ user_stats.total }})</span>
+          <!-- Search box -->
+          <input type="text" id="user-search" class="ap-form-control" placeholder="Search users…"
+                 style="max-width:220px;" onkeyup="filterTable('user-table','user-search')">
+        </div>
+        <div class="table-responsive">
+          <table class="ap-table" id="user-table">
+            <thead>
+              <tr>
+                <th>User</th><th>Email</th><th>Role</th><th>Department</th>
+                <th>Status</th><th>Joined</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in all_users %}
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:.5rem;">
+                    <div style="width:30px;height:30px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.7rem;flex-shrink:0;">
+                      {{ u.username|first|upper }}
+                    </div>
+                    <div>
+                      <div style="font-weight:600;font-size:.82rem;">{{ u.full_name }}</div>
+                      <div style="font-size:.7rem;color:#6b7a99;">@{{ u.username }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-size:.78rem;">{{ u.email|default:"—" }}</td>
+                <td>
+                  <span class="ap-badge ap-badge-{% if u.role == 'ADMIN' %}admin{% elif u.role == 'MANAGER' %}manager{% else %}employee{% endif %}">
+                    {{ u.get_role_display }}
+                  </span>
+                </td>
+                <td style="font-size:.78rem;">{{ u.department.name|default:"—" }}</td>
+                <td>
+                  <span class="ap-badge ap-badge-{% if u.status == 'ACTIVE' %}active{% elif u.status == 'INACTIVE' %}inactive{% else %}suspended{% endif %}">
+                    {{ u.get_status_display }}
+                  </span>
+                </td>
+                <td style="font-size:.72rem;color:#6b7a99;">{{ u.date_joined|date:"d M Y" }}</td>
+                <td>
+                  <div style="display:flex;gap:.35rem;flex-wrap:nowrap;">
+                    <a href="{% url 'accounts:portal_user_edit' u.pk %}" class="ap-btn ap-btn-ghost ap-btn-sm" title="Edit">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{% url 'accounts:portal_reset_password' u.pk %}" class="ap-btn ap-btn-ghost ap-btn-sm" title="Reset Password">
+                      <i class="bi bi-key"></i>
+                    </a>
+                    <form method="POST" action="{% url 'accounts:portal_user_toggle' u.pk %}" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="ap-btn ap-btn-sm {% if u.status == 'ACTIVE' %}ap-btn-warning{% else %}ap-btn-success{% endif %}"
+                              title="{% if u.status == 'ACTIVE' %}Deactivate{% else %}Activate{% endif %}">
+                        <i class="bi bi-{% if u.status == 'ACTIVE' %}person-x{% else %}person-check{% endif %}"></i>
+                      </button>
+                    </form>
+                    {% if u != request.user %}
+                    <form method="POST" action="{% url 'accounts:portal_user_delete' u.pk %}" style="display:inline;"
+                          onsubmit="return confirm('Delete user \'{{ u.username }}\'? This cannot be undone.');">
+                      {% csrf_token %}
+                      <button type="submit" class="ap-btn ap-btn-danger ap-btn-sm" title="Delete">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" style="text-align:center;padding:2rem;color:#6b7a99;">No users found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /#sec-users -->
+
+
+    <!-- ═══════════ SECTION: DEPARTMENTS ═════════ -->
+    <div id="sec-departments" class="ap-section" style="display:none;">
+
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="ap-section-title mb-0">Departments</div>
+        <a href="{% url 'accounts:portal_dept_create' %}" class="ap-btn ap-btn-primary">
+          <i class="bi bi-plus-lg"></i> Add Department
+        </a>
+      </div>
+
+      <div class="ap-card">
+        <div class="table-responsive">
+          <table class="ap-table">
+            <thead>
+              <tr><th>Name</th><th>Description</th><th>Users</th><th>Contracts</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {% for dept in departments %}
+              <tr>
+                <td style="font-weight:600;">{{ dept.name }}</td>
+                <td style="color:#6b7a99;font-size:.78rem;">{{ dept.description|default:"—"|truncatechars:50 }}</td>
+                <td>
+                  <span class="ap-badge ap-badge-manager">{{ dept.user_count }}</span>
+                </td>
+                <td>
+                  <span class="ap-badge ap-badge-admin">{{ dept.contract_count }}</span>
+                </td>
+                <td>
+                  <div style="display:flex;gap:.35rem;">
+                    <a href="{% url 'accounts:portal_dept_edit' dept.pk %}" class="ap-btn ap-btn-ghost ap-btn-sm">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <form method="POST" action="{% url 'accounts:portal_dept_delete' dept.pk %}" style="display:inline;"
+                          onsubmit="return confirm('Delete department \'{{ dept.name }}\'?');">
+                      {% csrf_token %}
+                      <button type="submit" class="ap-btn ap-btn-danger ap-btn-sm"><i class="bi bi-trash"></i></button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" style="text-align:center;padding:2rem;color:#6b7a99;">No departments yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /#sec-departments -->
+
+
+    <!-- ═══════════ SECTION: CONTRACTS ═══════════ -->
+    <div id="sec-contracts" class="ap-section" style="display:none;">
+
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="ap-section-title mb-0">All Contracts</div>
+        <a href="{% url 'contracts:contract_create' %}" class="ap-btn ap-btn-primary">
+          <i class="bi bi-plus-lg"></i> New Contract
+        </a>
+      </div>
+
+      <!-- Contract categories -->
+      <div class="row g-3 mb-4">
+        {% for cat in categories %}
+        <div class="col-6 col-md-3">
+          <div class="ap-stat" style="padding:.8rem 1rem;">
+            <div class="ap-stat-icon indigo" style="width:36px;height:36px;font-size:.9rem;"><i class="bi bi-tag"></i></div>
+            <div>
+              <div style="font-size:1.25rem;font-weight:800;">{{ cat.count }}</div>
+              <div style="font-size:.68rem;color:#6b7a99;">{{ cat.name|truncatechars:22 }}</div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="ap-card">
+        <div class="ap-card-header">
+          <span class="ap-card-title">Recent Contracts</span>
+          <a href="{% url 'contracts:contract_list' %}" class="ap-btn ap-btn-primary ap-btn-sm">
+            <i class="bi bi-arrow-right"></i> View All in CRM
+          </a>
+        </div>
+        <div class="table-responsive">
+          <table class="ap-table">
+            <thead><tr><th>Number</th><th>Title</th><th>Vendor</th><th>Status</th><th>Priority</th><th>End Date</th><th>Owner</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for c in recent_contracts %}
+              <tr>
+                <td><a href="{% url 'contracts:contract_detail' c.pk %}" style="color:#a78bfa;font-weight:600;text-decoration:none;">{{ c.contract_number }}</a></td>
+                <td style="font-size:.82rem;">{{ c.title|truncatechars:35 }}</td>
+                <td style="font-size:.78rem;color:#6b7a99;">{{ c.party_name|truncatechars:25 }}</td>
+                <td>
+                  <span class="ap-badge ap-badge-{% if c.status == 'ACTIVE' %}active{% elif c.status == 'EXPIRED' %}inactive{% elif c.status == 'DRAFT' %}employee{% else %}manager{% endif %}">
+                    {{ c.get_status_display }}
+                  </span>
+                </td>
+                <td>
+                  <span style="font-size:.72rem;font-weight:600;color:{% if c.priority == 'CRITICAL' %}#dc2626{% elif c.priority == 'HIGH' %}#d97706{% else %}#6b7280{% endif %};">
+                    {{ c.get_priority_display }}
+                  </span>
+                </td>
+                <td style="font-size:.78rem;">{{ c.end_date|date:"d M Y" }}</td>
+                <td style="font-size:.78rem;">{{ c.owner.username|default:"—" }}</td>
+                <td>
+                  <div style="display:flex;gap:.3rem;">
+                    <a href="{% url 'contracts:contract_detail' c.pk %}" class="ap-btn ap-btn-ghost ap-btn-sm"><i class="bi bi-eye"></i></a>
+                    <a href="{% url 'contracts:contract_edit' c.pk %}" class="ap-btn ap-btn-ghost ap-btn-sm"><i class="bi bi-pencil"></i></a>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="8" style="text-align:center;padding:2rem;color:#6b7a99;">No contracts found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /#sec-contracts -->
+
+
+    <!-- ═══════════ SECTION: EXPIRING ════════════ -->
+    <div id="sec-expiring" class="ap-section" style="display:none;">
+
+      <div class="ap-section-title">Contracts Expiring in 30 Days</div>
+
+      <div class="ap-card">
+        <div class="table-responsive">
+          <table class="ap-table">
+            <thead><tr><th>Number</th><th>Title</th><th>Status</th><th>End Date</th><th>Days Left</th><th>Owner</th><th>Action</th></tr></thead>
+            <tbody>
+              {% for c in expiring %}
+              <tr>
+                <td><a href="{% url 'contracts:contract_detail' c.pk %}" style="color:#a78bfa;font-weight:600;text-decoration:none;">{{ c.contract_number }}</a></td>
+                <td>{{ c.title|truncatechars:45 }}</td>
+                <td><span class="ap-badge ap-badge-{% if c.status == 'ACTIVE' %}active{% else %}manager{% endif %}">{{ c.get_status_display }}</span></td>
+                <td style="font-size:.8rem;">{{ c.end_date|date:"d M Y" }}</td>
+                <td>
+                  <span style="font-weight:800;color:{% if c.days_until_expiry <= 7 %}#dc2626{% else %}#d97706{% endif %};">
+                    {{ c.days_until_expiry }}d
+                  </span>
+                </td>
+                <td style="font-size:.78rem;">{{ c.owner.username|default:"—" }}</td>
+                <td>
+                  <a href="{% url 'contracts:contract_detail' c.pk %}" class="ap-btn ap-btn-warning ap-btn-sm">Review</a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" style="text-align:center;padding:2.5rem;color:#6b7a99;"><i class="bi bi-check-circle" style="font-size:2rem;opacity:.3;"></i><br>No contracts expiring in the next 30 days.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {% if expired_recent %}
+      <div class="ap-section-title mt-4">Recently Expired</div>
+      <div class="ap-card">
+        <div class="table-responsive">
+          <table class="ap-table">
+            <thead><tr><th>Number</th><th>Title</th><th>Expired On</th><th>Owner</th><th>Action</th></tr></thead>
+            <tbody>
+              {% for c in expired_recent %}
+              <tr>
+                <td><a href="{% url 'contracts:contract_detail' c.pk %}" style="color:#a78bfa;font-weight:600;text-decoration:none;">{{ c.contract_number }}</a></td>
+                <td>{{ c.title|truncatechars:45 }}</td>
+                <td style="font-size:.8rem;color:#f87171;">{{ c.end_date|date:"d M Y" }}</td>
+                <td style="font-size:.78rem;">{{ c.owner.username|default:"—" }}</td>
+                <td>
+                  <a href="{% url 'contracts:contract_detail' c.pk %}" class="ap-btn ap-btn-ghost ap-btn-sm"><i class="bi bi-eye"></i></a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+    </div><!-- /#sec-expiring -->
+
+
+    <!-- ═══════════ SECTION: APPROVALS ═══════════ -->
+    <div id="sec-approvals" class="ap-section" style="display:none;">
+
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="ap-section-title mb-0">Recent Approvals</div>
+        <a href="{% url 'approvals:approval_list' %}" class="ap-btn ap-btn-ghost ap-btn-sm">View All</a>
+      </div>
+
+      <div class="ap-card">
+        <div class="table-responsive">
+          <table class="ap-table">
+            <thead><tr><th>Contract</th><th>Reviewer</th><th>Decision</th><th>Comment</th><th>Date</th></tr></thead>
+            <tbody>
+              {% for a in recent_approvals %}
+              <tr>
+                <td><a href="{% url 'contracts:contract_detail' a.contract.pk %}" style="color:#a78bfa;font-weight:600;text-decoration:none;">{{ a.contract.contract_number }}</a></td>
+                <td style="font-size:.82rem;">{{ a.reviewer.full_name|default:"—" }}</td>
+                <td>
+                  <span class="ap-badge {% if a.action == 'APPROVED' %}ap-badge-active{% elif a.action == 'REJECTED' %}ap-badge-inactive{% else %}ap-badge-manager{% endif %}">
+                    {{ a.get_action_display }}
+                  </span>
+                </td>
+                <td style="font-size:.78rem;color:#6b7a99;">{{ a.comment|truncatechars:50|default:"—" }}</td>
+                <td style="font-size:.72rem;color:#6b7a99;">{{ a.created_at|date:"d M Y H:i" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" style="text-align:center;padding:2rem;color:#6b7a99;">No approval history.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /#sec-approvals -->
+
+
+    <!-- ═══════════ SECTION: SIGNATURES ══════════ -->
+    <div id="sec-signatures" class="ap-section" style="display:none;">
+
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="ap-section-title mb-0">Signature Requests</div>
+        <a href="{% url 'signatures:signature_list' %}" class="ap-btn ap-btn-ghost ap-btn-sm">View All</a>
+      </div>
+
+      <div class="ap-card">
+        <div class="table-responsive">
+          <table class="ap-table">
+            <thead><tr><th>Contract</th><th>Signer</th><th>Status</th><th>Requested</th><th>Signed At</th></tr></thead>
+            <tbody>
+              {% for sig in recent_signatures %}
+              <tr>
+                <td><a href="{% url 'contracts:contract_detail' sig.contract.pk %}" style="color:#a78bfa;font-weight:600;text-decoration:none;">{{ sig.contract.contract_number }}</a></td>
+                <td style="font-size:.82rem;">{{ sig.signer.full_name|default:"—" }}</td>
+                <td>
+                  <span class="ap-badge {% if sig.status == 'SIGNED' %}ap-badge-active{% elif sig.status == 'REJECTED' %}ap-badge-inactive{% else %}ap-badge-suspended{% endif %}">
+                    {{ sig.get_status_display }}
+                  </span>
+                </td>
+                <td style="font-size:.72rem;color:#6b7a99;">{{ sig.requested_at|date:"d M Y" }}</td>
+                <td style="font-size:.72rem;color:#6b7a99;">{{ sig.signed_at|date:"d M Y H:i"|default:"—" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" style="text-align:center;padding:2rem;color:#6b7a99;">No signature requests.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /#sec-signatures -->
+
+
+    <!-- ═══════════ SECTION: ACTIVITY ════════════ -->
+    <div id="sec-activity" class="ap-section" style="display:none;">
+
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="ap-section-title mb-0">System Activity Log</div>
+        <a href="{% url 'audit:audit_list' %}" class="ap-btn ap-btn-primary ap-btn-sm">Full Log</a>
+      </div>
+
+      <div class="ap-card">
+        <div class="table-responsive">
+          <table class="ap-table">
+            <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Module</th><th>Description</th><th>IP</th></tr></thead>
+            <tbody>
+              {% for log in recent_activities %}
+              <tr>
+                <td style="font-size:.72rem;white-space:nowrap;color:#6b7a99;">{{ log.timestamp|date:"d M Y H:i" }}</td>
+                <td style="font-size:.8rem;font-weight:600;">{{ log.user.username|default:"System" }}</td>
+                <td>
+                  <span class="ap-badge {% if log.action == 'CREATE' %}ap-badge-active{% elif log.action == 'DELETE' %}ap-badge-inactive{% elif log.action == 'LOGIN' %}ap-badge-manager{% else %}ap-badge-employee{% endif %}">
+                    {{ log.action }}
+                  </span>
+                </td>
+                <td style="font-size:.72rem;color:#6b7a99;">{{ log.module }}</td>
+                <td style="font-size:.78rem;">{{ log.description|truncatechars:70 }}</td>
+                <td style="font-size:.7rem;color:#6b7a99;">{{ log.ip_address|default:"—" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" style="text-align:center;padding:2rem;color:#6b7a99;">No activity recorded.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /#sec-activity -->
+
+  </div><!-- /.ap-content -->
+</div><!-- /.ap-main -->
+
+</div><!-- /.ap-body -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ── Section switcher ─────────────────────────────────────── */
+const sections = ['overview','users','departments','contracts','expiring','approvals','signatures','activity'];
+
+const titleMap = {
+  overview:    'Dashboard',
+  users:       'Manage Users',
+  departments: 'Departments',
+  contracts:   'All Contracts',
+  expiring:    'Expiring Contracts',
+  approvals:   'Approvals',
+  signatures:  'Signatures',
+  activity:    'Audit Log',
+};
+
+function showSection(id, linkEl) {
+  sections.forEach(s => {
+    const el = document.getElementById('sec-' + s);
+    if (el) el.style.display = (s === id) ? 'block' : 'none';
+  });
+
+  document.querySelectorAll('.ap-nav-link').forEach(l => l.classList.remove('active'));
+  if (linkEl) linkEl.classList.add('active');
+
+  document.getElementById('ap-topbar-title').textContent = titleMap[id] || id;
+
+  // close mobile sidebar
+  document.getElementById('ap-sidebar').classList.remove('open');
+}
+
+/* ── User table search ────────────────────────────────────── */
+function filterTable(tableId, inputId) {
+  const query = document.getElementById(inputId).value.toLowerCase();
+  const rows  = document.querySelectorAll('#' + tableId + ' tbody tr');
+  rows.forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+  });
+}
+
+/* ── Auto-dismiss alerts ──────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.ap-alert').forEach(el => {
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .4s'; setTimeout(() => el.remove(), 400); }, 4000);
+  });
+});
+</script>
+</body>
+</html>

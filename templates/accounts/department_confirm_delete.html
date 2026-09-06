@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Delete Department{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">Delete Department</h1></div>
+<div class="card" style="max-width:480px;">
+  <div class="card-body p-4">
+    <p>Are you sure you want to delete department <strong>{{ dept.name }}</strong>?</p>
+    <p class="text-muted small">This will remove the department association from all users in it.</p>
+    <form method="POST">{% csrf_token %}
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{% url 'accounts:department_list' %}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

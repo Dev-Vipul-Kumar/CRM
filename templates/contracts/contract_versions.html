@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Versions — {{ contract.contract_number }}{% endblock %}
+{% block nav_contracts %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'contracts:contract_list' %}">Contracts</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'contracts:contract_detail' contract.pk %}">{{ contract.contract_number }}</a></li>
+      <li class="breadcrumb-item active">Version History</li>
+    </ol></nav>
+    <h1 class="page-title">Version History</h1>
+    <p class="page-subtitle">{{ contract.title }}</p>
+  </div>
+  {% if request.user.is_admin or request.user.is_manager %}
+  <a href="{% url 'contracts:contract_upload_version' contract.pk %}" class="btn btn-primary">
+    <i class="bi bi-upload me-1"></i>Upload New Version
+  </a>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>Current</th>
+          <th>Change Summary</th>
+          <th>Uploaded By</th>
+          <th>Date</th>
+          <th>Document</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in versions %}
+        <tr {% if v.is_current %}style="background:rgba(129,140,248,.08);border-left:2px solid rgba(129,140,248,.4);"{% endif %}>
+          <td>
+            <span class="fw-700">v{{ v.version_number }}</span>
+          </td>
+          <td>
+            {% if v.is_current %}
+              <span class="badge bg-success">Current</span>
+            {% endif %}
+          </td>
+          <td style="font-size:.875rem;">{{ v.change_summary|default:"—" }}</td>
+          <td style="font-size:.875rem;">{{ v.created_by.username|default:"—" }}</td>
+          <td style="font-size:.8rem;">{{ v.created_at|date:"d M Y H:i" }}</td>
+          <td>
+            {% if v.document %}
+            <a href="{% url 'contracts:download_document' v.pk %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-download me-1"></i>Download
+            </a>
+            {% else %}
+            <span class="text-muted" style="font-size:.8rem;">No file</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center py-5 text-muted">No versions found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

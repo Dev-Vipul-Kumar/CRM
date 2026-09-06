@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Audit Log{% endblock %}
+{% block nav_audit %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Audit Log</h1>
+    <p class="page-subtitle">Complete record of system activities</p>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-body py-3">
+    <form method="get">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <input type="text" name="search" class="form-control form-control-sm" placeholder="Search description…" value="{{ search }}">
+        </div>
+        <div class="col-md-2">
+          <select name="action" class="form-select form-select-sm auto-filter">
+            <option value="">All Actions</option>
+            {% for val, label in actions %}
+              <option value="{{ val }}" {% if action_filter == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <input type="text" name="user" class="form-control form-control-sm" placeholder="Username…" value="{{ user_filter }}">
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+          <a href="{% url 'audit:audit_list' %}" class="btn btn-outline-secondary btn-sm ms-1">Clear</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead>
+        <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Module</th><th>Description</th><th>IP</th></tr>
+      </thead>
+      <tbody>
+        {% for log in page_obj %}
+        <tr>
+          <td style="font-size:.78rem;white-space:nowrap;">{{ log.timestamp|date:"d M Y H:i:s" }}</td>
+          <td style="font-size:.85rem;">{{ log.user.username|default:"System" }}</td>
+          <td>
+            <span class="badge {% if log.action == 'CREATE' %}bg-success{% elif log.action == 'DELETE' %}bg-danger{% elif log.action == 'LOGIN' %}bg-primary{% elif log.action == 'APPROVE' %}bg-primary{% else %}bg-secondary{% endif %}" style="font-size:.7rem;">
+              {{ log.action }}
+            </span>
+          </td>
+          <td style="font-size:.8rem;">{{ log.module }}</td>
+          <td style="font-size:.85rem;">{{ log.description|truncatechars:80 }}</td>
+          <td style="font-size:.78rem;color:var(--text-muted);">{{ log.ip_address|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center py-5 text-muted">No audit entries found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <div class="card-footer d-flex justify-content-between align-items-center">
+    <small class="text-muted">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</small>
+    <nav><ul class="pagination pagination-sm mb-0">
+      {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&action={{ action_filter }}&user={{ user_filter }}">‹</a></li>{% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+          <li class="page-item {% if num == page_obj.number %}active{% endif %}"><a class="page-link" href="?page={{ num }}&search={{ search }}&action={{ action_filter }}&user={{ user_filter }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}&action={{ action_filter }}&user={{ user_filter }}">›</a></li>{% endif %}
+    </ul></nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

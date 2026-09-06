@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Upload Version{% endblock %}
+{% block nav_contracts %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'contracts:contract_list' %}">Contracts</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'contracts:contract_detail' contract.pk %}">{{ contract.contract_number }}</a></li>
+      <li class="breadcrumb-item active">Upload New Version</li>
+    </ol></nav>
+    <h1 class="page-title">Upload New Version</h1>
+    <p class="page-subtitle">{{ contract.title }}</p>
+  </div>
+</div>
+
+<div class="card" style="max-width:560px;">
+  <div class="card-body p-4">
+    <form method="POST" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label">Contract Document *</label>
+        {{ form.document }}
+        <div class="form-text">Allowed: PDF, DOC, DOCX. Max 10 MB.</div>
+        {% if form.document.errors %}<div class="text-danger small mt-1">{{ form.document.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="mb-4">
+        <label class="form-label">Change Summary</label>
+        {{ form.change_summary }}
+        <div class="form-text">Describe what changed in this version.</div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-upload me-1"></i>Upload</button>
+        <a href="{% url 'contracts:contract_versions' contract.pk %}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

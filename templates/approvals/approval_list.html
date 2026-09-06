@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Approvals{% endblock %}
+{% block nav_approvals %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Approvals</h1>
+    <p class="page-subtitle">Contract approval workflow</p>
+  </div>
+</div>
+
+{% if pending_contracts %}
+<div class="card mb-4">
+  <div class="card-header">
+    <span class="card-title text-warning"><i class="bi bi-hourglass-split me-1"></i>Pending Your Review</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>Contract #</th><th>Title</th><th>Submitted By</th><th>Date</th><th class="text-end">Action</th></tr></thead>
+      <tbody>
+        {% for c in pending_contracts %}
+        <tr>
+          <td><a href="{% url 'contracts:contract_detail' c.pk %}" class="text-primary fw-600">{{ c.contract_number }}</a></td>
+          <td>{{ c.title|truncatechars:50 }}</td>
+          <td>{{ c.owner.full_name|default:"—" }}</td>
+          <td style="font-size:.8rem;">{{ c.updated_at|date:"d M Y" }}</td>
+          <td class="text-end">
+            <a href="{% url 'approvals:approval_action' c.pk %}" class="btn btn-sm btn-success">
+              <i class="bi bi-check2-circle me-1"></i>Review
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-header"><span class="card-title">Approval History</span></div>
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead>
+        <tr><th>Contract</th><th>Reviewer</th><th>Action</th><th>Comment</th><th>Date</th></tr>
+      </thead>
+      <tbody>
+        {% for a in page_obj %}
+        <tr>
+          <td><a href="{% url 'contracts:contract_detail' a.contract.pk %}" class="text-primary fw-500">{{ a.contract.contract_number }}</a></td>
+          <td>{{ a.reviewer.full_name|default:"—" }}</td>
+          <td>
+            <span class="status-badge {% if a.action == 'APPROVED' %}badge-active{% elif a.action == 'REJECTED' %}badge-danger{% elif a.action == 'SUBMITTED' %}badge-info{% else %}badge-warning{% endif %}">
+              {{ a.get_action_display }}
+            </span>
+          </td>
+          <td style="font-size:.85rem;">{{ a.comment|truncatechars:60|default:"—" }}</td>
+          <td style="font-size:.8rem;">{{ a.created_at|date:"d M Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center py-5 text-muted">No approval history.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

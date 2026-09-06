@@ -1,0 +1,27 @@
+# ── Python ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+
+# ── Media uploads (user files — not in version control) ───
+media/
+
+# ── Virtual environments ───────────────────────────────────
+.env
+.venv
+env/
+venv/
+ENV/
+
+# ── IDE ────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── OS ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

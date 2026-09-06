@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Departments{% endblock %}
+{% block nav_departments %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Departments</h1>
+  </div>
+  <a href="{% url 'accounts:department_create' %}" class="btn btn-primary">
+    <i class="bi bi-plus-lg me-1"></i>Add Department
+  </a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>Name</th><th>Description</th><th>Users</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for dept in departments %}
+        <tr>
+          <td class="fw-600">{{ dept.name }}</td>
+          <td class="text-muted">{{ dept.description|default:"—" }}</td>
+          <td>{{ dept.users.count }}</td>
+          <td class="text-end">
+            <a href="{% url 'accounts:department_edit' dept.pk %}" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <form method="POST" action="{% url 'accounts:department_delete' dept.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger" type="submit"
+                      data-confirm="Delete department '{{ dept.name }}'?">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center py-5 text-muted">No departments yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

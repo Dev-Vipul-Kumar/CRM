@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block nav_contracts %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'contracts:contract_list' %}">Contracts</a></li>
+      {% if contract %}<li class="breadcrumb-item"><a href="{% url 'contracts:contract_detail' contract.pk %}">{{ contract.contract_number }}</a></li>{% endif %}
+      <li class="breadcrumb-item active">{{ title }}</li>
+    </ol></nav>
+    <h1 class="page-title">{{ title }}</h1>
+  </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data" novalidate>
+{% csrf_token %}
+
+<div class="row g-4">
+
+  <!-- Left column -->
+  <div class="col-lg-8">
+
+    <!-- Basic Information -->
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Basic Information</span></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Contract Title *</label>
+            {{ contract_form.title }}
+            {% if contract_form.title.errors %}<div class="text-danger small mt-1">{{ contract_form.title.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contract Type</label>
+            {{ contract_form.contract_type }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Priority</label>
+            {{ contract_form.priority }}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            {{ contract_form.description }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Party Information -->
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Vendor / Party Information</span></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Party / Vendor Name *</label>
+            {{ contract_form.party_name }}
+            {% if contract_form.party_name.errors %}<div class="text-danger small mt-1">{{ contract_form.party_name.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contact Person</label>
+            {{ contract_form.party_contact }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contact Email</label>
+            {{ contract_form.party_email }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contact Phone</label>
+            {{ contract_form.party_phone }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financial & Terms -->
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Financial & Terms</span></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Contract Value (₹)</label>
+            {{ contract_form.contract_value }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Payment Terms</label>
+            {{ contract_form.payment_terms }}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Renewal Terms</label>
+            {{ contract_form.renewal_terms }}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Notes</label>
+            {{ contract_form.notes }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if version_form %}
+    <!-- Document Upload (create only) -->
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Document Upload</span></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Contract Document (PDF, DOC, DOCX)</label>
+            {{ version_form.document }}
+            <div class="form-text">Maximum 10 MB. Supported: PDF, DOC, DOCX</div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Version Notes</label>
+            {{ version_form.change_summary }}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div><!-- /col-lg-8 -->
+
+  <!-- Right column -->
+  <div class="col-lg-4">
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Organisation</span></div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label class="form-label">Department</label>
+          {{ contract_form.department }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Owner</label>
+          {{ contract_form.owner }}
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Dates</span></div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label class="form-label">Start Date *</label>
+          {{ contract_form.start_date }}
+          {% if contract_form.start_date.errors %}<div class="text-danger small mt-1">{{ contract_form.start_date.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="mb-3">
+          <label class="form-label">End Date *</label>
+          {{ contract_form.end_date }}
+          {% if contract_form.end_date.errors %}<div class="text-danger small mt-1">{{ contract_form.end_date.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="mb-0">
+          <label class="form-label">Renewal Date</label>
+          {{ contract_form.renewal_date }}
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex flex-column gap-2">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-lg me-1"></i>{{ action }}
+      </button>
+      <a href="{% if contract %}{% url 'contracts:contract_detail' contract.pk %}{% else %}{% url 'contracts:contract_list' %}{% endif %}"
+         class="btn btn-outline-secondary">Cancel</a>
+    </div>
+  </div>
+
+</div>
+</form>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Contracts{% endblock %}
+{% block nav_contracts %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Contracts</h1>
+    <p class="page-subtitle">{{ page_obj.paginator.count }} contract(s) found</p>
+  </div>
+  {% if request.user.is_admin or request.user.is_manager %}
+  <a href="{% url 'contracts:contract_create' %}" class="btn btn-primary">
+    <i class="bi bi-plus-lg me-1"></i>New Contract
+  </a>
+  {% endif %}
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-body py-3">
+    <form method="get" id="filter-form">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <input type="text" name="search" class="form-control form-control-sm"
+                 placeholder="Number, title, vendor…" value="{{ search }}">
+        </div>
+        <div class="col-md-2">
+          <select name="status" class="form-select form-select-sm auto-filter">
+            <option value="">All Statuses</option>
+            {% for val, label in statuses %}
+              <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select name="contract_type" class="form-select form-select-sm auto-filter">
+            <option value="">All Types</option>
+            {% for cat in categories %}
+              <option value="{{ cat.pk }}" {% if type_filter == cat.pk|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select name="department" class="form-select form-select-sm auto-filter">
+            <option value="">All Departments</option>
+            {% for dept in departments %}
+              <option value="{{ dept.pk }}" {% if dept_filter == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-1">
+          <select name="priority" class="form-select form-select-sm auto-filter">
+            <option value="">Priority</option>
+            {% for val, label in priorities %}
+              <option value="{{ val }}" {% if priority_filter == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select name="sort" class="form-select form-select-sm auto-filter">
+            <option value="-created_at" {% if sort == "-created_at" %}selected{% endif %}>Newest</option>
+            <option value="created_at"  {% if sort == "created_at" %}selected{% endif %}>Oldest</option>
+            <option value="end_date"    {% if sort == "end_date" %}selected{% endif %}>Expiry ↑</option>
+            <option value="-end_date"   {% if sort == "-end_date" %}selected{% endif %}>Expiry ↓</option>
+            <option value="-contract_value" {% if sort == "-contract_value" %}selected{% endif %}>Value ↓</option>
+            <option value="contract_number" {% if sort == "contract_number" %}selected{% endif %}>Number</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+          <a href="{% url 'contracts:contract_list' %}" class="btn btn-outline-secondary btn-sm ms-1">Clear</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th>Contract #</th>
+          <th>Title</th>
+          <th>Vendor</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>End Date</th>
+          <th>Owner</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in page_obj %}
+        <tr>
+          <td>
+            <a href="{% url 'contracts:contract_detail' c.pk %}" class="text-primary fw-600">{{ c.contract_number }}</a>
+          </td>
+          <td>
+            <div style="max-width:240px;">{{ c.title|truncatechars:45 }}</div>
+            {% if c.department %}<small class="text-muted">{{ c.department.name }}</small>{% endif %}
+          </td>
+          <td style="font-size:.85rem;">{{ c.party_name }}</td>
+          <td>
+            <span class="status-badge badge-{{ c.status_badge_class }}">{{ c.get_status_display }}</span>
+          </td>
+          <td>
+            <span class="status-badge priority-{{ c.priority|lower }}">{{ c.get_priority_display }}</span>
+          </td>
+          <td style="font-size:.8rem;">
+            {% if c.days_until_expiry is not None %}
+              {% if c.days_until_expiry < 0 %}
+                <span class="text-danger">{{ c.end_date|date:"d M Y" }}</span>
+              {% elif c.days_until_expiry <= 7 %}
+                <span class="text-danger fw-600">{{ c.end_date|date:"d M Y" }}</span>
+              {% elif c.days_until_expiry <= 30 %}
+                <span class="text-warning fw-600">{{ c.end_date|date:"d M Y" }}</span>
+              {% else %}
+                {{ c.end_date|date:"d M Y" }}
+              {% endif %}
+            {% else %}—{% endif %}
+          </td>
+          <td style="font-size:.85rem;">{{ c.owner.username|default:"—" }}</td>
+          <td class="text-end">
+            <a href="{% url 'contracts:contract_detail' c.pk %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye"></i>
+            </a>
+            {% if request.user.is_admin or request.user.is_manager %}
+            <a href="{% url 'contracts:contract_edit' c.pk %}" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-pencil"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center py-5">
+            <div class="empty-state">
+              <div class="empty-state-icon"><i class="bi bi-file-earmark-text"></i></div>
+              <p>No contracts found. {% if request.user.is_manager or request.user.is_admin %}<a href="{% url 'contracts:contract_create' %}">Create the first one.</a>{% endif %}</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <div class="card-footer d-flex justify-content-between align-items-center">
+    <small class="text-muted">
+      Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}
+    </small>
+    <nav><ul class="pagination pagination-sm mb-0">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status_filter }}&sort={{ sort }}">‹ Prev</a></li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+          <li class="page-item"><a class="page-link" href="?page={{ num }}&search={{ search }}&status={{ status_filter }}&sort={{ sort }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status_filter }}&sort={{ sort }}">Next ›</a></li>
+      {% endif %}
+    </ul></nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

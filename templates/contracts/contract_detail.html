@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+{% block title %}{{ contract.contract_number }}{% endblock %}
+{% block nav_contracts %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'contracts:contract_list' %}">Contracts</a></li>
+      <li class="breadcrumb-item active">{{ contract.contract_number }}</li>
+    </ol></nav>
+    <h1 class="page-title">{{ contract.title }}</h1>
+    <div class="d-flex align-items-center gap-2 mt-1">
+      <code style="font-size:.85rem;">{{ contract.contract_number }}</code>
+      <span class="status-badge badge-{{ contract.status_badge_class }}">{{ contract.get_status_display }}</span>
+      <span class="status-badge priority-{{ contract.priority|lower }}">{{ contract.get_priority_display }}</span>
+    </div>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    {% if request.user.is_admin or request.user.is_manager %}
+    <a href="{% url 'contracts:contract_edit' contract.pk %}" class="btn btn-primary btn-sm">
+      <i class="bi bi-pencil me-1"></i>Edit
+    </a>
+    {% if contract.status == 'DRAFT' or contract.status == 'REJECTED' %}
+    <a href="{% url 'approvals:submit_for_review' contract.pk %}" class="btn btn-warning btn-sm">
+      <i class="bi bi-send me-1"></i>Submit for Approval
+    </a>
+    {% endif %}
+    {% if contract.status == 'PENDING_APPROVAL' %}
+    <a href="{% url 'approvals:approval_action' contract.pk %}" class="btn btn-success btn-sm">
+      <i class="bi bi-check2-circle me-1"></i>Review/Approve
+    </a>
+    {% endif %}
+    {% if contract.status == 'APPROVED' %}
+    <a href="{% url 'signatures:request_signature' contract.pk %}" class="btn btn-info btn-sm text-white">
+      <i class="bi bi-pen me-1"></i>Request Signatures
+    </a>
+    {% endif %}
+    <a href="{% url 'contracts:contract_assign' contract.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-people me-1"></i>Assign
+    </a>
+    <a href="{% url 'contracts:contract_upload_version' contract.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-upload me-1"></i>Upload Version
+    </a>
+    {% if request.user.is_admin %}
+    <form method="POST" action="{% url 'contracts:contract_archive' contract.pk %}" class="d-inline">
+      {% csrf_token %}
+      <button class="btn btn-outline-danger btn-sm"
+              data-confirm="Archive this contract?">
+        <i class="bi bi-archive me-1"></i>Archive
+      </button>
+    </form>
+    {% endif %}
+    {% if request.user.is_admin or request.user.is_manager %}
+    {% if contract.status == 'ACTIVE' or contract.status == 'EXPIRING_SOON' or contract.status == 'EXPIRED' %}
+    <!-- Renew modal trigger -->
+    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#renewModal">
+      <i class="bi bi-arrow-clockwise me-1"></i>Renew
+    </button>
+    {% endif %}
+    {% if contract.status != 'CANCELLED' and contract.status != 'ARCHIVED' and contract.status != 'EXPIRED' %}
+    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal">
+      <i class="bi bi-x-circle me-1"></i>Cancel
+    </button>
+    {% endif %}
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- Left: Main info -->
+  <div class="col-lg-8">
+
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Contract Information</span></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <small class="text-muted d-block">Contract Type</small>
+            <strong>{{ contract.contract_type.name|default:"—" }}</strong>
+          </div>
+          <div class="col-md-6">
+            <small class="text-muted d-block">Department</small>
+            <strong>{{ contract.department.name|default:"—" }}</strong>
+          </div>
+          <div class="col-md-6">
+            <small class="text-muted d-block">Start Date</small>
+            <strong>{{ contract.start_date|date:"d M Y" }}</strong>
+          </div>
+          <div class="col-md-6">
+            <small class="text-muted d-block">End Date</small>
+            <strong>
+              {{ contract.end_date|date:"d M Y" }}
+              {% if contract.days_until_expiry is not None %}
+                {% if contract.days_until_expiry < 0 %}
+                  <span class="badge bg-danger ms-1">Expired</span>
+                {% elif contract.days_until_expiry <= 7 %}
+                  <span class="badge bg-danger ms-1">{{ contract.days_until_expiry }}d left</span>
+                {% elif contract.days_until_expiry <= 30 %}
+                  <span class="badge bg-warning ms-1">{{ contract.days_until_expiry }}d left</span>
+                {% endif %}
+              {% endif %}
+            </strong>
+          </div>
+          {% if contract.renewal_date %}
+          <div class="col-md-6">
+            <small class="text-muted d-block">Renewal Date</small>
+            <strong>{{ contract.renewal_date|date:"d M Y" }}</strong>
+          </div>
+          {% endif %}
+          {% if contract.contract_value %}
+          <div class="col-md-6">
+            <small class="text-muted d-block">Contract Value</small>
+            <strong>₹ {{ contract.contract_value|floatformat:2 }}</strong>
+          </div>
+          {% endif %}
+          {% if contract.payment_terms %}
+          <div class="col-md-6">
+            <small class="text-muted d-block">Payment Terms</small>
+            <strong>{{ contract.payment_terms }}</strong>
+          </div>
+          {% endif %}
+          <div class="col-md-6">
+            <small class="text-muted d-block">Owner</small>
+            <strong>{{ contract.owner.full_name|default:"—" }}</strong>
+          </div>
+          <div class="col-md-6">
+            <small class="text-muted d-block">Created By</small>
+            <strong>{{ contract.created_by.username|default:"—" }}</strong>
+          </div>
+          <div class="col-12">
+            <small class="text-muted d-block">Description</small>
+            <p class="mb-0">{{ contract.description|default:"—" }}</p>
+          </div>
+          {% if contract.notes %}
+          <div class="col-12">
+            <small class="text-muted d-block">Notes</small>
+            <p class="mb-0">{{ contract.notes }}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Party info -->
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Vendor / Party Information</span></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <small class="text-muted d-block">Company</small>
+            <strong>{{ contract.party_name }}</strong>
+          </div>
+          <div class="col-md-6">
+            <small class="text-muted d-block">Contact Person</small>
+            <strong>{{ contract.party_contact|default:"—" }}</strong>
+          </div>
+          <div class="col-md-6">
+            <small class="text-muted d-block">Email</small>
+            <strong>{{ contract.party_email|default:"—" }}</strong>
+          </div>
+          <div class="col-md-6">
+            <small class="text-muted d-block">Phone</small>
+            <strong>{{ contract.party_phone|default:"—" }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Approval History -->
+    {% if approvals %}
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Approval History</span></div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead><tr><th>Reviewer</th><th>Action</th><th>Comment</th><th>Date</th></tr></thead>
+          <tbody>
+            {% for a in approvals %}
+            <tr>
+              <td>{{ a.reviewer.full_name|default:"—" }}</td>
+              <td>
+                <span class="status-badge {% if a.action == 'APPROVED' %}badge-active{% elif a.action == 'REJECTED' %}badge-danger{% else %}badge-info{% endif %}">
+                  {{ a.get_action_display }}
+                </span>
+              </td>
+              <td style="font-size:.85rem;">{{ a.comment|default:"—" }}</td>
+              <td style="font-size:.8rem;">{{ a.created_at|date:"d M Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Signatures -->
+    {% if signatures %}
+    <div class="card mb-4">
+      <div class="card-header">
+        <span class="card-title">Signatures</span>
+        {% if request.user.is_admin or request.user.is_manager %}
+        <a href="{% url 'signatures:request_signature' contract.pk %}" class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-pen me-1"></i>Request Signature
+        </a>
+        {% endif %}
+      </div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead><tr><th>Signer</th><th>Status</th><th>Requested</th><th>Signed At</th></tr></thead>
+          <tbody>
+            {% for sig in signatures %}
+            <tr>
+              <td>{{ sig.signer.full_name|default:"—" }}</td>
+              <td>
+                <span class="status-badge {% if sig.status == 'SIGNED' %}badge-signed{% elif sig.status == 'REJECTED' %}badge-rejected{% else %}badge-pending{% endif %}">
+                  {{ sig.get_status_display }}
+                </span>
+              </td>
+              <td style="font-size:.8rem;">{{ sig.requested_at|date:"d M Y" }}</td>
+              <td style="font-size:.8rem;">{{ sig.signed_at|date:"d M Y H:i"|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+  </div><!-- /col-lg-8 -->
+
+  <!-- Right: Sidebar info -->
+  <div class="col-lg-4">
+
+    <!-- Current document -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <span class="card-title"><i class="bi bi-file-earmark-pdf me-1"></i>Document</span>
+        <a href="{% url 'contracts:contract_versions' contract.pk %}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-clock-history me-1"></i>History
+        </a>
+      </div>
+      <div class="card-body">
+        {% with cv=contract.current_version %}
+        {% if cv and cv.document %}
+          <p class="mb-2" style="font-size:.85rem;">
+            <i class="bi bi-file-earmark text-primary me-1"></i>
+            Version {{ cv.version_number }} — {{ cv.created_at|date:"d M Y" }}
+          </p>
+          <a href="{% url 'contracts:download_document' cv.pk %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-download me-1"></i>Download
+          </a>
+        {% else %}
+          <p class="text-muted mb-2" style="font-size:.85rem;">No document uploaded yet.</p>
+          {% if request.user.is_admin or request.user.is_manager %}
+          <a href="{% url 'contracts:contract_upload_version' contract.pk %}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-upload me-1"></i>Upload Document
+          </a>
+          {% endif %}
+        {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+
+    <!-- Assigned Users -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <span class="card-title"><i class="bi bi-people me-1"></i>Assigned Users</span>
+        {% if request.user.is_admin or request.user.is_manager %}
+        <a href="{% url 'contracts:contract_assign' contract.pk %}" class="btn btn-sm btn-outline-secondary">Manage</a>
+        {% endif %}
+      </div>
+      <div class="card-body p-0">
+        {% if assignments %}
+        <ul class="list-group list-group-flush">
+          {% for asgn in assignments %}
+          <li class="list-group-item py-2 px-3 d-flex align-items-center gap-2">
+            <div class="topbar-avatar" style="width:28px;height:28px;font-size:.7rem;flex-shrink:0;">{{ asgn.user.username|first|upper }}</div>
+            <div>
+              <div style="font-size:.85rem;font-weight:500;">{{ asgn.user.full_name }}</div>
+              <div style="font-size:.72rem;color:var(--text-muted);">{{ asgn.user.get_role_display }}</div>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted text-center py-3" style="font-size:.85rem;">No users assigned.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Activity link -->
+    <div class="card">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <span style="font-size:.875rem;font-weight:500;">Contract Activity</span>
+        <a href="{% url 'audit:contract_activity' contract.pk %}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-clock-history me-1"></i>View Timeline
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Renew Modal ───────────────────────────────────────── -->
+<div class="modal fade" id="renewModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-arrow-clockwise me-2 text-success"></i>Renew Contract</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'contracts:contract_renew' contract.pk %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p style="font-size:.875rem;color:var(--text-muted);">
+            Enter the new end date for <strong>{{ contract.contract_number }}</strong>.
+            A new document version will be created to record this renewal.
+          </p>
+          <label class="form-label mt-2">New End Date *</label>
+          <input type="date" name="new_end_date" class="form-control" required
+                 min="{{ today|date:'Y-m-d' }}">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-arrow-clockwise me-1"></i>Renew Contract
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── Cancel Modal ──────────────────────────────────────── -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-x-circle me-2 text-warning"></i>Cancel Contract</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'contracts:contract_cancel' contract.pk %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p style="font-size:.875rem;color:var(--text-muted);">
+            Are you sure you want to cancel <strong>{{ contract.contract_number }}</strong>?
+            This action will be recorded in the audit log.
+          </p>
+          <label class="form-label mt-2">Reason for cancellation (optional)</label>
+          <textarea name="cancel_reason" class="form-control" rows="3"
+                    placeholder="Briefly describe the reason…"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
+          <button type="submit" class="btn btn-warning">
+            <i class="bi bi-x-circle me-1"></i>Cancel Contract
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

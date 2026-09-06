@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}User: {{ target_user.username }}{% endblock %}
+{% block nav_users %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'accounts:user_list' %}">Users</a></li>
+      <li class="breadcrumb-item active">{{ target_user.username }}</li>
+    </ol></nav>
+    <h1 class="page-title">{{ target_user.full_name }}</h1>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'accounts:user_edit' target_user.pk %}" class="btn btn-primary btn-sm">
+      <i class="bi bi-pencil me-1"></i>Edit
+    </a>
+    <a href="{% url 'accounts:user_reset_password' target_user.pk %}" class="btn btn-outline-warning btn-sm">
+      <i class="bi bi-key me-1"></i>Reset Password
+    </a>
+    <form method="POST" action="{% url 'accounts:user_toggle_status' target_user.pk %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit"
+              class="btn btn-sm {% if target_user.status == 'ACTIVE' %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
+              data-confirm="{% if target_user.status == 'ACTIVE' %}Deactivate this user?{% else %}Activate this user?{% endif %}">
+        {% if target_user.status == 'ACTIVE' %}
+          <i class="bi bi-person-x me-1"></i>Deactivate
+        {% else %}
+          <i class="bi bi-person-check me-1"></i>Activate
+        {% endif %}
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body text-center p-4">
+        <div class="mx-auto mb-3" style="width:72px;height:72px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.75rem;font-weight:700;">
+          {{ target_user.username|first|upper }}
+        </div>
+        <h5 class="fw-700 mb-1">{{ target_user.full_name }}</h5>
+        <p class="text-muted mb-2" style="font-size:.875rem;">@{{ target_user.username }}</p>
+        <span class="status-badge {% if target_user.role == 'ADMIN' %}badge-primary{% elif target_user.role == 'MANAGER' %}badge-info{% else %}badge-secondary{% endif %}">
+          {{ target_user.get_role_display }}
+        </span>
+        &nbsp;
+        <span class="status-badge {% if target_user.status == 'ACTIVE' %}badge-active{% else %}badge-danger{% endif %}">
+          {{ target_user.get_status_display }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">User Information</span>
+      </div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-4 text-muted fw-500" style="font-size:.8rem;">Email</dt>
+          <dd class="col-sm-8">{{ target_user.email|default:"—" }}</dd>
+
+          <dt class="col-sm-4 text-muted fw-500" style="font-size:.8rem;">Phone</dt>
+          <dd class="col-sm-8">{{ target_user.phone|default:"—" }}</dd>
+
+          <dt class="col-sm-4 text-muted fw-500" style="font-size:.8rem;">Department</dt>
+          <dd class="col-sm-8">{{ target_user.department.name|default:"—" }}</dd>
+
+          <dt class="col-sm-4 text-muted fw-500" style="font-size:.8rem;">Date Joined</dt>
+          <dd class="col-sm-8">{{ target_user.date_joined|date:"d M Y" }}</dd>
+
+          <dt class="col-sm-4 text-muted fw-500" style="font-size:.8rem;">Last Login</dt>
+          <dd class="col-sm-8">{{ target_user.last_login|date:"d M Y H:i"|default:"Never" }}</dd>
+
+          <dt class="col-sm-4 text-muted fw-500" style="font-size:.8rem;">Staff Access</dt>
+          <dd class="col-sm-8">{% if target_user.is_staff %}Yes{% else %}No{% endif %}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

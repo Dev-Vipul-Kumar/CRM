@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block nav_users %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Users</h1>
+    <p class="page-subtitle">Manage system users and their roles</p>
+  </div>
+  <a href="{% url 'accounts:user_create' %}" class="btn btn-primary">
+    <i class="bi bi-person-plus me-1"></i> Add User
+  </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-body py-3">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <input type="text" name="search" class="form-control form-control-sm"
+               placeholder="Search name, email, username…" value="{{ search }}">
+      </div>
+      <div class="col-md-2">
+        <select name="role" class="form-select form-select-sm auto-filter">
+          <option value="">All Roles</option>
+          {% for val, label in roles %}
+            <option value="{{ val }}" {% if role_filter == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="status" class="form-select form-select-sm auto-filter">
+          <option value="">All Statuses</option>
+          {% for val, label in statuses %}
+            <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="department" class="form-select form-select-sm auto-filter">
+          <option value="">All Departments</option>
+          {% for dept in departments %}
+            <option value="{{ dept.pk }}" {% if dept_filter == dept.pk|stringformat:"s" %}selected{% endif %}>
+              {{ dept.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary btn-sm">Search</button>
+        <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-secondary btn-sm ms-1">Clear</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Department</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th>Last Login</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in page_obj %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="topbar-avatar" style="width:32px;height:32px;font-size:.75rem;">
+                {{ user.username|first|upper }}
+              </div>
+              <div>
+                <div class="fw-600">{{ user.full_name }}</div>
+                <div class="text-muted" style="font-size:.78rem;">{{ user.username }} · {{ user.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="status-badge {% if user.role == 'ADMIN' %}badge-primary{% elif user.role == 'MANAGER' %}badge-info{% else %}badge-secondary{% endif %}">
+              {{ user.get_role_display }}
+            </span>
+          </td>
+          <td>{{ user.department.name|default:"—" }}</td>
+          <td>
+            <span class="status-badge {% if user.status == 'ACTIVE' %}badge-active{% else %}badge-danger{% endif %}">
+              {{ user.get_status_display }}
+            </span>
+          </td>
+          <td style="font-size:.8rem;">{{ user.date_joined|date:"d M Y" }}</td>
+          <td style="font-size:.8rem;">{{ user.last_login|date:"d M Y H:i"|default:"Never" }}</td>
+          <td class="text-end">
+            <a href="{% url 'accounts:user_detail' user.pk %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye"></i>
+            </a>
+            <a href="{% url 'accounts:user_edit' user.pk %}" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-pencil"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center py-5 text-muted">No users found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <div class="card-footer d-flex justify-content-between align-items-center">
+    <small class="text-muted">
+      Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}
+    </small>
+    <nav><ul class="pagination pagination-sm mb-0">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&role={{ role_filter }}&status={{ status_filter }}&department={{ dept_filter }}">‹</a></li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}&search={{ search }}&role={{ role_filter }}&status={{ status_filter }}&department={{ dept_filter }}">{{ num }}</a>
+        </li>
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}&role={{ role_filter }}&status={{ status_filter }}&department={{ dept_filter }}">›</a></li>
+      {% endif %}
+    </ul></nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

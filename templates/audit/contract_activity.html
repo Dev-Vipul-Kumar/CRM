@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Activity — {{ contract.contract_number }}{% endblock %}
+{% block nav_contracts %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'contracts:contract_list' %}">Contracts</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'contracts:contract_detail' contract.pk %}">{{ contract.contract_number }}</a></li>
+      <li class="breadcrumb-item active">Activity</li>
+    </ol></nav>
+    <h1 class="page-title">Contract Activity</h1>
+    <p class="page-subtitle">{{ contract.title }}</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-4">
+    {% if logs %}
+    <ul class="timeline">
+      {% for log in logs %}
+      <li class="timeline-item">
+        <div class="timeline-dot {% if log.action == 'CREATE' %}bg-success{% elif log.action == 'APPROVE' %}bg-primary{% elif log.action == 'SIGN' %}bg-purple{% elif log.action == 'REJECT' %}bg-danger{% else %}bg-secondary{% endif %}" style="background:{% if log.action == 'CREATE' %}var(--success){% elif log.action == 'APPROVE' %}var(--primary){% elif log.action == 'REJECT' %}var(--danger){% else %}var(--text-muted){% endif %}"></div>
+        <div class="timeline-content">
+          <div style="font-size:.875rem;">
+            <strong>{{ log.user.username|default:"System" }}</strong> — {{ log.description }}
+          </div>
+          <div class="timeline-date">{{ log.timestamp|date:"d M Y H:i" }}</div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon"><i class="bi bi-clock-history"></i></div>
+      <p>No activity recorded yet.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

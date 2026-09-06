@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Contract Categories{% endblock %}
+{% block nav_categories %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1 class="page-title">Contract Categories</h1></div>
+  <a href="{% url 'contracts:category_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Category</a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>Name</th><th>Description</th><th>Contracts</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for cat in categories %}
+        <tr>
+          <td class="fw-600">{{ cat.name }}</td>
+          <td class="text-muted">{{ cat.description|default:"—" }}</td>
+          <td>{{ cat.contracts.count }}</td>
+          <td class="text-end">
+            <a href="{% url 'contracts:category_edit' cat.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+            <form method="POST" action="{% url 'contracts:category_delete' cat.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger" data-confirm="Delete category '{{ cat.name }}'?"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center py-5 text-muted">No categories yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

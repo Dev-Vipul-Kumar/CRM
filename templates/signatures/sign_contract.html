@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Sign Contract{% endblock %}
+{% block nav_signatures %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+  #signature-pad { width: 100%; height: 200px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'signatures:signature_list' %}">Signatures</a></li>
+      <li class="breadcrumb-item active">Sign</li>
+    </ol></nav>
+    <h1 class="page-title">Sign Contract</h1>
+    <p class="page-subtitle">{{ signature.contract.contract_number }} — {{ signature.contract.title }}</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-8">
+    <div class="card mb-3">
+      <div class="card-header"><span class="card-title">Contract Summary</span></div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Contract #</dt><dd class="col-sm-8">{{ signature.contract.contract_number }}</dd>
+          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Title</dt><dd class="col-sm-8">{{ signature.contract.title }}</dd>
+          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Vendor</dt><dd class="col-sm-8">{{ signature.contract.party_name }}</dd>
+          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">End Date</dt><dd class="col-sm-8">{{ signature.contract.end_date|date:"d M Y" }}</dd>
+          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Requested By</dt><dd class="col-sm-8">{{ signature.requested_by.full_name|default:"—" }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Your Signature</span></div>
+      <div class="card-body">
+        <p class="text-muted mb-3" style="font-size:.875rem;">
+          Draw your signature below. By submitting, you acknowledge that you have read and agree to the contract terms.
+        </p>
+
+        <canvas id="signature-pad" width="700" height="200"></canvas>
+
+        <div class="d-flex gap-2 mt-2 mb-4">
+          <button type="button" id="clear-pad" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-eraser me-1"></i>Clear
+          </button>
+        </div>
+
+        <form method="POST" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="action" value="sign">
+          <input type="hidden" name="signature_data" id="signature_data">
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success" onclick="captureSignature()">
+              <i class="bi bi-check-lg me-1"></i>Sign Contract
+            </button>
+
+            <button type="button" class="btn btn-outline-danger"
+                    data-bs-toggle="modal" data-bs-target="#rejectModal">
+              <i class="bi bi-x-lg me-1"></i>Reject
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    {% with cv=signature.contract.current_version %}
+    {% if cv and cv.document %}
+    <div class="card">
+      <div class="card-header"><span class="card-title">Document to Sign</span></div>
+      <div class="card-body">
+        <p style="font-size:.85rem;" class="mb-2">Version {{ cv.version_number }}</p>
+        <a href="{% url 'contracts:download_document' cv.pk %}" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-download me-1"></i>Download & Review
+        </a>
+      </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reject Signature</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST">
+        {% csrf_token %}
+        <div class="modal-body">
+          <input type="hidden" name="action" value="reject">
+          <label class="form-label">Reason for rejection</label>
+          <textarea name="rejection_reason" class="form-control" rows="3" required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Reject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  initSignaturePad('signature-pad', 'clear-pad', 'signature_data');
+
+  function captureSignature() {
+    const canvas = document.getElementById('signature-pad');
+    document.getElementById('signature_data').value = canvas.toDataURL();
+  }
+</script>
+{% endblock %}

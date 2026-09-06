@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Audit Entry{% endblock %}
+{% block nav_audit %}active{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'audit:audit_list' %}">Audit Log</a></li>
+      <li class="breadcrumb-item active">Entry #{{ log.pk }}</li>
+    </ol></nav>
+    <h1 class="page-title">Audit Entry</h1>
+  </div>
+</div>
+<div class="card" style="max-width:560px;">
+  <div class="card-body">
+    <dl class="row">
+      <dt class="col-sm-4 text-muted">Timestamp</dt><dd class="col-sm-8">{{ log.timestamp|date:"d M Y H:i:s" }}</dd>
+      <dt class="col-sm-4 text-muted">User</dt><dd class="col-sm-8">{{ log.user.username|default:"System" }}</dd>
+      <dt class="col-sm-4 text-muted">Action</dt><dd class="col-sm-8">{{ log.action }}</dd>
+      <dt class="col-sm-4 text-muted">Module</dt><dd class="col-sm-8">{{ log.module }}</dd>
+      <dt class="col-sm-4 text-muted">Object Type</dt><dd class="col-sm-8">{{ log.object_type|default:"—" }}</dd>
+      <dt class="col-sm-4 text-muted">Object ID</dt><dd class="col-sm-8">{{ log.object_id|default:"—" }}</dd>
+      <dt class="col-sm-4 text-muted">Description</dt><dd class="col-sm-8">{{ log.description }}</dd>
+      <dt class="col-sm-4 text-muted">IP Address</dt><dd class="col-sm-8">{{ log.ip_address|default:"—" }}</dd>
+    </dl>
+  </div>
+</div>
+{% endblock %}

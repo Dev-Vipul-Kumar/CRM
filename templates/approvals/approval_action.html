@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Review Contract{% endblock %}
+{% block nav_approvals %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'approvals:approval_list' %}">Approvals</a></li>
+      <li class="breadcrumb-item active">Review</li>
+    </ol></nav>
+    <h1 class="page-title">Review Contract</h1>
+    <p class="page-subtitle">{{ contract.contract_number }} — {{ contract.title }}</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-8">
+    <div class="card mb-3">
+      <div class="card-header"><span class="card-title">Contract Summary</span></div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Contract #</dt><dd class="col-sm-8">{{ contract.contract_number }}</dd>
+          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Title</dt><dd class="col-sm-8">{{ contract.title }}</dd>
+          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Vendor</dt><dd class="col-sm-8">{{ contract.party_name }}</dd>
+          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Value</dt><dd class="col-sm-8">{% if contract.contract_value %}₹ {{ contract.contract_value|floatformat:2 }}{% else %}—{% endif %}</dd>
+          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Start Date</dt><dd class="col-sm-8">{{ contract.start_date|date:"d M Y" }}</dd>
+          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">End Date</dt><dd class="col-sm-8">{{ contract.end_date|date:"d M Y" }}</dd>
+          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Owner</dt><dd class="col-sm-8">{{ contract.owner.full_name|default:"—" }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Your Decision</span></div>
+      <div class="card-body">
+        <form method="POST" novalidate>
+          {% csrf_token %}
+          <div class="mb-3">
+            {% for radio in form.action %}
+            <div class="form-check mb-2">
+              {{ radio.tag }}
+              <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+            </div>
+            {% endfor %}
+            {% if form.action.errors %}<div class="text-danger small mt-1">{{ form.action.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Comment</label>
+            {{ form.comment }}
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Submit Decision</button>
+            <a href="{% url 'contracts:contract_detail' contract.pk %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    {% with cv=contract.current_version %}
+    {% if cv and cv.document %}
+    <div class="card">
+      <div class="card-header"><span class="card-title">Document</span></div>
+      <div class="card-body">
+        <p style="font-size:.85rem;" class="mb-2">Version {{ cv.version_number }}</p>
+        <a href="{% url 'contracts:download_document' cv.pk %}" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-download me-1"></i>Download
+        </a>
+      </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Signatures{% endblock %}
+{% block nav_signatures %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Signatures</h1>
+    <p class="page-subtitle">Digital signature requests and history</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead>
+        <tr><th>Contract</th><th>Signer</th><th>Status</th><th>Requested</th><th>Signed At</th><th class="text-end">Action</th></tr>
+      </thead>
+      <tbody>
+        {% for sig in page_obj %}
+        <tr>
+          <td><a href="{% url 'contracts:contract_detail' sig.contract.pk %}" class="text-primary fw-500">{{ sig.contract.contract_number }}</a>
+            <div class="text-muted" style="font-size:.75rem;">{{ sig.contract.title|truncatechars:35 }}</div>
+          </td>
+          <td>{{ sig.signer.full_name|default:"—" }}</td>
+          <td>
+            <span class="status-badge {% if sig.status == 'SIGNED' %}badge-signed{% elif sig.status == 'REJECTED' %}badge-rejected{% else %}badge-pending{% endif %}">
+              {{ sig.get_status_display }}
+            </span>
+          </td>
+          <td style="font-size:.8rem;">{{ sig.requested_at|date:"d M Y" }}</td>
+          <td style="font-size:.8rem;">{{ sig.signed_at|date:"d M Y H:i"|default:"—" }}</td>
+          <td class="text-end">
+            {% if sig.status == 'PENDING' and sig.signer == request.user %}
+            <a href="{% url 'signatures:sign_contract' sig.pk %}" class="btn btn-sm btn-primary">
+              <i class="bi bi-pen me-1"></i>Sign
+            </a>
+            {% endif %}
+            <a href="{% url 'signatures:signature_detail' sig.pk %}" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center py-5 text-muted">No signature requests found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
