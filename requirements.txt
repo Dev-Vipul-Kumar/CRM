@@ -1,7 +1,6 @@
 Django
 Pillow
 gunicorn
-uvicorn
-whitenoise
-dj-database-url
 psycopg[binary]
+dj-database-url
+whitenoise
