@@ -445,7 +445,7 @@ a:hover { color:var(--ap-p2); }
   /* Off-canvas sidebar */
   .ap-sidebar {
     transform: translateX(-100%);
-    z-index: 500;
+    z-index: 600;
     width: 260px;
     transition: transform .3s cubic-bezier(.4,0,.2,1);
   }
@@ -499,10 +499,18 @@ a:hover { color:var(--ap-p2); }
   display: none;
   position: fixed; inset: 0;
   background: rgba(0,0,0,.6);
-  z-index: 499;  /* ap-sidebar is z-index:500 on mobile */
-  /* NO backdrop-filter — it blurs the sidebar above it */
+  z-index: 499;
+  pointer-events: none;   /* NEVER intercept clicks */
 }
-.ap-overlay.active { display: block; }
+.ap-overlay.active {
+  display: block;
+  pointer-events: auto;   /* active overlay is clickable to close sidebar */
+}
+
+/* Portal sidebar must sit above overlay on mobile */
+@media (max-width: 767px) {
+  .ap-sidebar { z-index: 600; }
+}
 
 /* ── Extra-small (< 480px) ─────────────────────────────── */
 @media (max-width: 480px) {

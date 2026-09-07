@@ -838,18 +838,27 @@ body::before {
    MOBILE OVERLAY
 ═══════════════════════════════════════════════════════════ */
 .sidebar-overlay {
-  display: none; position: fixed; inset: 0;
+  display: none;
+  position: fixed; inset: 0;
   background: rgba(0,0,0,.6);
-  z-index: 399;   /* sidebar is z-index:500 on mobile — overlay sits beneath */
-  /* NO backdrop-filter — it blurs the sidebar that slides over it */
+  z-index: 499;
+  pointer-events: none;   /* NEVER intercept clicks — sidebar handles its own events */
 }
-.sidebar-overlay.active { display: block; }
+.sidebar-overlay.active {
+  display: block;
+  pointer-events: auto;   /* active = dim bg is clickable (to close sidebar) */
+}
+
+/* On mobile the sidebar MUST be above the overlay */
+@media (max-width: 767px) {
+  .sidebar { z-index: 600; }
+}
 
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .sidebar { transform:translateX(-100%); z-index:500; }
+  .sidebar { transform:translateX(-100%); z-index:600; }
   .sidebar.open { transform:translateX(0); }
   .main-area { margin-left:0; }
 }
@@ -980,7 +989,7 @@ a:hover { color: var(--p2); }
   /* ── Sidebar off-canvas ── */
   .sidebar {
     transform: translateX(-100%);
-    z-index: 500;
+    z-index: 600;
     width: 260px;
   }
   .sidebar.open {
@@ -1090,7 +1099,7 @@ a:hover { color: var(--p2); }
 
   /* ── Admin portal inside portal.html ── */
   .ap-main { margin-left: 0; }
-  .ap-sidebar { transform: translateX(-100%); z-index: 500; }
+  .ap-sidebar { transform: translateX(-100%); z-index: 600; }
   .ap-sidebar.open { transform: translateX(0); }
 
   /* ── Reports layout: all full-width on mobile ── */
