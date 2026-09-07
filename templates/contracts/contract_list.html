@@ -2,7 +2,32 @@
 {% block title %}Contracts{% endblock %}
 {% block nav_contracts %}active{% endblock %}
 
+{% block extra_css %}
+<style>
+/* ── Contract list mobile overrides ─────────────────────── */
+@media (max-width: 767px) {
+  /* Hide less-critical columns on mobile */
+  .tbl-vendor, .tbl-priority, .tbl-owner { display: none; }
+  /* Make contract number + title stack more naturally */
+  .contract-num-cell { white-space: nowrap; }
+  /* Filters grid: 2 per row on mobile */
+  .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .filter-grid .filter-full { grid-column: 1 / -1; }
+  /* Pagination text hidden on mobile */
+  .pagination-info { display: none; }
+  /* Action buttons: only icons on mobile */
+  .btn-action-text { display: none; }
+}
+@media (max-width: 480px) {
+  /* Stack filters 1 per row on very small screens */
+  .filter-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
+
+<!-- Page header -->
 <div class="page-header">
   <div>
     <h1 class="page-title">Contracts</h1>
@@ -10,20 +35,27 @@
   </div>
   {% if request.user.is_admin or request.user.is_manager %}
   <a href="{% url 'contracts:contract_create' %}" class="btn btn-primary">
-    <i class="bi bi-plus-lg me-1"></i>New Contract
+    <i class="bi bi-plus-lg me-1"></i><span class="btn-action-text">New Contract</span>
+    <span class="d-md-none">New</span>
   </a>
   {% endif %}
 </div>
 
-<!-- Filters -->
-<div class="card mb-4">
-  <div class="card-body py-3">
-    <form method="get" id="filter-form" class="filter-form row g-2 align-items-end">
-        <div class="col-md-3">
+<!-- ── Filters ──────────────────────────────────────────── -->
+<div class="card mb-3">
+  <div class="card-body py-3 px-3">
+    <form method="get" id="filter-form">
+      <div class="filter-grid">
+
+        <!-- Search — full width -->
+        <div class="filter-full">
           <input type="text" name="search" class="form-control form-control-sm"
-                 placeholder="Number, title, vendor…" value="{{ search }}">
+                 placeholder="Search contract #, title, vendor…"
+                 value="{{ search }}">
         </div>
-        <div class="col-md-2">
+
+        <!-- Status -->
+        <div>
           <select name="status" class="form-select form-select-sm auto-filter">
             <option value="">All Statuses</option>
             {% for val, label in statuses %}
@@ -31,7 +63,9 @@
             {% endfor %}
           </select>
         </div>
-        <div class="col-md-2">
+
+        <!-- Type -->
+        <div>
           <select name="contract_type" class="form-select form-select-sm auto-filter">
             <option value="">All Types</option>
             {% for cat in categories %}
@@ -39,104 +73,145 @@
             {% endfor %}
           </select>
         </div>
-        <div class="col-md-2">
+
+        <!-- Department -->
+        <div>
           <select name="department" class="form-select form-select-sm auto-filter">
-            <option value="">All Departments</option>
+            <option value="">All Depts</option>
             {% for dept in departments %}
               <option value="{{ dept.pk }}" {% if dept_filter == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
             {% endfor %}
           </select>
         </div>
-        <div class="col-md-1">
-          <select name="priority" class="form-select form-select-sm auto-filter">
-            <option value="">Priority</option>
-            {% for val, label in priorities %}
-              <option value="{{ val }}" {% if priority_filter == val %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="col-md-2">
+
+        <!-- Sort -->
+        <div>
           <select name="sort" class="form-select form-select-sm auto-filter">
             <option value="-created_at" {% if sort == "-created_at" %}selected{% endif %}>Newest</option>
-            <option value="created_at"  {% if sort == "created_at" %}selected{% endif %}>Oldest</option>
-            <option value="end_date"    {% if sort == "end_date" %}selected{% endif %}>Expiry ↑</option>
-            <option value="-end_date"   {% if sort == "-end_date" %}selected{% endif %}>Expiry ↓</option>
+            <option value="created_at"  {% if sort == "created_at"  %}selected{% endif %}>Oldest</option>
+            <option value="end_date"    {% if sort == "end_date"    %}selected{% endif %}>Expiry ↑</option>
+            <option value="-end_date"   {% if sort == "-end_date"   %}selected{% endif %}>Expiry ↓</option>
             <option value="-contract_value" {% if sort == "-contract_value" %}selected{% endif %}>Value ↓</option>
             <option value="contract_number" {% if sort == "contract_number" %}selected{% endif %}>Number</option>
           </select>
         </div>
-        <div class="col-auto">
-          <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-          <a href="{% url 'contracts:contract_list' %}" class="btn btn-outline-secondary btn-sm ms-1">Clear</a>
+
+        <!-- Buttons — full width -->
+        <div class="filter-full d-flex gap-2">
+          <button type="submit" class="btn btn-primary btn-sm flex-fill flex-md-grow-0">
+            <i class="bi bi-search me-1"></i>Filter
+          </button>
+          <a href="{% url 'contracts:contract_list' %}" class="btn btn-outline-secondary btn-sm flex-fill flex-md-grow-0">
+            <i class="bi bi-x-lg me-1 d-md-none"></i><span class="d-none d-md-inline">Clear</span><span class="d-md-none">Clear</span>
+          </a>
         </div>
+
       </div>
     </form>
   </div>
 </div>
 
+<!-- ── Contract table ───────────────────────────────────── -->
 <div class="card">
   <div class="table-responsive">
     <table class="table mb-0">
       <thead>
         <tr>
-          <th>Contract #</th>
-          <th>Title</th>
-          <th>Vendor</th>
+          <th>Contract</th>
+          <th class="tbl-vendor">Vendor</th>
           <th>Status</th>
-          <th>Priority</th>
-          <th>End Date</th>
-          <th>Owner</th>
+          <th class="tbl-priority">Priority</th>
+          <th>Expiry</th>
+          <th class="tbl-owner">Owner</th>
           <th class="text-end">Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for c in page_obj %}
         <tr>
-          <td>
-            <a href="{% url 'contracts:contract_detail' c.pk %}" class="text-primary fw-600">{{ c.contract_number }}</a>
+
+          <!-- Contract # + Title combined -->
+          <td class="contract-num-cell">
+            <a href="{% url 'contracts:contract_detail' c.pk %}"
+               class="fw-600 d-block"
+               style="color:var(--p1);font-size:.855rem;white-space:nowrap;">
+              {{ c.contract_number }}
+            </a>
+            <div style="font-size:.8rem;color:var(--text-main);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              {{ c.title }}
+            </div>
+            {% if c.department %}
+            <small class="text-muted" style="font-size:.72rem;">{{ c.department.name }}</small>
+            {% endif %}
           </td>
-          <td>
-            <div style="max-width:240px;">{{ c.title|truncatechars:45 }}</div>
-            {% if c.department %}<small class="text-muted">{{ c.department.name }}</small>{% endif %}
+
+          <!-- Vendor — hidden on mobile -->
+          <td class="tbl-vendor" style="font-size:.82rem;max-width:140px;">
+            <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:140px;">
+              {{ c.party_name }}
+            </span>
           </td>
-          <td style="font-size:.85rem;">{{ c.party_name }}</td>
+
+          <!-- Status -->
           <td>
-            <span class="status-badge badge-{{ c.status_badge_class }}">{{ c.get_status_display }}</span>
+            <span class="status-badge badge-{{ c.status_badge_class }}" style="font-size:.68rem;">
+              {{ c.get_status_display }}
+            </span>
           </td>
-          <td>
-            <span class="status-badge priority-{{ c.priority|lower }}">{{ c.get_priority_display }}</span>
+
+          <!-- Priority — hidden on mobile -->
+          <td class="tbl-priority">
+            <span class="status-badge priority-{{ c.priority|lower }}" style="font-size:.68rem;">
+              {{ c.get_priority_display }}
+            </span>
           </td>
-          <td style="font-size:.8rem;">
+
+          <!-- Expiry -->
+          <td style="font-size:.78rem;white-space:nowrap;">
             {% if c.days_until_expiry is not None %}
               {% if c.days_until_expiry < 0 %}
-                <span class="text-danger">{{ c.end_date|date:"d M Y" }}</span>
+                <span style="color:var(--danger);">{{ c.end_date|date:"d M Y" }}</span>
               {% elif c.days_until_expiry <= 7 %}
-                <span class="text-danger fw-600">{{ c.end_date|date:"d M Y" }}</span>
+                <span style="color:var(--danger);font-weight:700;">{{ c.end_date|date:"d M Y" }}</span>
               {% elif c.days_until_expiry <= 30 %}
-                <span class="text-warning fw-600">{{ c.end_date|date:"d M Y" }}</span>
+                <span style="color:var(--warning);font-weight:700;">{{ c.end_date|date:"d M Y" }}</span>
               {% else %}
                 {{ c.end_date|date:"d M Y" }}
               {% endif %}
             {% else %}—{% endif %}
           </td>
-          <td style="font-size:.85rem;">{{ c.owner.username|default:"—" }}</td>
-          <td class="text-end">
-            <a href="{% url 'contracts:contract_detail' c.pk %}" class="btn btn-sm btn-outline-primary">
+
+          <!-- Owner — hidden on mobile -->
+          <td class="tbl-owner" style="font-size:.82rem;">{{ c.owner.username|default:"—" }}</td>
+
+          <!-- Actions -->
+          <td class="text-end" style="white-space:nowrap;">
+            <a href="{% url 'contracts:contract_detail' c.pk %}"
+               class="btn btn-sm btn-outline-primary"
+               title="View">
               <i class="bi bi-eye"></i>
             </a>
             {% if request.user.is_admin or request.user.is_manager %}
-            <a href="{% url 'contracts:contract_edit' c.pk %}" class="btn btn-sm btn-outline-secondary">
+            <a href="{% url 'contracts:contract_edit' c.pk %}"
+               class="btn btn-sm btn-outline-secondary"
+               title="Edit">
               <i class="bi bi-pencil"></i>
             </a>
             {% endif %}
           </td>
+
         </tr>
         {% empty %}
         <tr>
-          <td colspan="8" class="text-center py-5">
+          <td colspan="7" class="text-center py-5">
             <div class="empty-state">
               <div class="empty-state-icon"><i class="bi bi-file-earmark-text"></i></div>
-              <p>No contracts found. {% if request.user.is_manager or request.user.is_admin %}<a href="{% url 'contracts:contract_create' %}">Create the first one.</a>{% endif %}</p>
+              <p class="mb-2">No contracts found.</p>
+              {% if request.user.is_manager or request.user.is_admin %}
+              <a href="{% url 'contracts:contract_create' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Create Contract
+              </a>
+              {% endif %}
             </div>
           </td>
         </tr>
@@ -145,27 +220,37 @@
     </table>
   </div>
 
+  <!-- Pagination -->
   {% if page_obj.has_other_pages %}
-  <div class="card-footer d-flex justify-content-between align-items-center">
-    <small class="text-muted">
+  <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <small class="text-muted pagination-info">
       Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}
     </small>
-    <nav><ul class="pagination pagination-sm mb-0">
-      {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status_filter }}&sort={{ sort }}">‹ Prev</a></li>
-      {% endif %}
-      {% for num in page_obj.paginator.page_range %}
-        {% if page_obj.number == num %}
-          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-        {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
-          <li class="page-item"><a class="page-link" href="?page={{ num }}&search={{ search }}&status={{ status_filter }}&sort={{ sort }}">{{ num }}</a></li>
+    <nav>
+      <ul class="pagination pagination-sm mb-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status_filter }}&sort={{ sort }}">‹</a>
+        </li>
         {% endif %}
-      {% endfor %}
-      {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status_filter }}&sort={{ sort }}">Next ›</a></li>
-      {% endif %}
-    </ul></nav>
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}&search={{ search }}&status={{ status_filter }}&sort={{ sort }}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status_filter }}&sort={{ sort }}">›</a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
   </div>
   {% endif %}
+
 </div>
 {% endblock %}
