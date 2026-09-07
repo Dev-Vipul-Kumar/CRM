@@ -34,7 +34,7 @@ function initSignaturePad(canvasId, clearBtnId, hiddenInputId) {
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(pos.x, pos.y);
-    ctx.strokeStyle = '#1a1d2e';
+    ctx.strokeStyle = '#e2e8f6';
     ctx.lineWidth   = 2.5;
     ctx.lineCap     = 'round';
     ctx.lineJoin    = 'round';

@@ -94,7 +94,7 @@
 
   <!-- Topbar -->
   <header class="ap-topbar">
-    <button class="ap-topbar-btn outline d-md-none me-2" onclick="document.getElementById('ap-sidebar').classList.toggle('open')" style="padding:.4rem .6rem;">
+    <button class="ap-topbar-btn outline d-md-none me-2" id="ap-hamburger" style="padding:.4rem .6rem;">
       <i class="bi bi-list"></i>
     </button>
     <span class="ap-topbar-title" id="ap-topbar-title">Dashboard</span>
@@ -787,9 +787,8 @@ function closeSidebar() {
 // The hamburger button uses onclick="document.getElementById('ap-sidebar').classList.toggle('open')"
 // Upgrade it to also toggle overlay
 document.addEventListener('DOMContentLoaded', function () {
-  const hamburger = document.querySelector('.ap-topbar-btn.outline.d-md-none');
+  const hamburger = document.getElementById('ap-hamburger');
   if (hamburger) {
-    hamburger.onclick = null;
     hamburger.addEventListener('click', () => {
       if (apSidebar && apSidebar.classList.contains('open')) { closeSidebar(); }
       else { openSidebar(); }

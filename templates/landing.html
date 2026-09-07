@@ -61,8 +61,26 @@
       Sign In
     </a>
 
+    <!-- Mobile hamburger -->
+    <button class="lp-hamburger" id="lp-hamburger" aria-label="Open menu">
+      <i class="bi bi-list"></i>
+    </button>
+
   </div>
 </nav>
+
+<!-- Mobile navigation overlay -->
+<div class="lp-mobile-nav" id="lp-mobile-nav">
+  <button class="lp-mobile-close" id="lp-mobile-close" aria-label="Close menu">
+    <i class="bi bi-x-lg"></i>
+  </button>
+  <a href="#features">Features</a>
+  <a href="#workflow">How it Works</a>
+  <a href="#roles">Roles</a>
+  <a href="{% url 'accounts:login' %}" class="lp-signin-btn" style="margin-top:1rem;">
+    <i class="bi bi-box-arrow-in-right"></i> Sign In
+  </a>
+</div>
 
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -639,6 +657,32 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
   });
 });
+
+/* ── Mobile nav toggle ─────────────────────────────────────── */
+const mobileNav = document.getElementById('lp-mobile-nav');
+const hamburger = document.getElementById('lp-hamburger');
+const mobileClose = document.getElementById('lp-mobile-close');
+
+if (hamburger && mobileNav) {
+  hamburger.addEventListener('click', () => {
+    mobileNav.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+}
+if (mobileClose && mobileNav) {
+  mobileClose.addEventListener('click', () => {
+    mobileNav.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+}
+if (mobileNav) {
+  mobileNav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileNav.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+}
 </script>
 
 </body>

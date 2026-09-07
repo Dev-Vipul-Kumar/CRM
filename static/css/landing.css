@@ -1001,17 +1001,186 @@ section { position: relative; z-index: 1; }
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════════════ */
+
+/* ── Mobile Nav Hamburger ───────────────────────────────── */
+.lp-hamburger {
+  display: none;
+  background: none;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 1.3rem;
+  padding: .35rem .55rem;
+  cursor: pointer;
+  transition: all .2s;
+  line-height: 1;
+}
+.lp-hamburger:hover {
+  color: #fff;
+  border-color: rgba(99,102,241,.5);
+  background: rgba(99,102,241,.1);
+}
+
+/* Mobile nav overlay */
+.lp-mobile-nav {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(7,8,15,.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+}
+.lp-mobile-nav.open {
+  display: flex;
+  opacity: 1;
+  pointer-events: auto;
+}
+.lp-mobile-nav a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 1.15rem;
+  font-weight: 600;
+  padding: .5rem 1.5rem;
+  border-radius: 10px;
+  transition: all .2s;
+}
+.lp-mobile-nav a:hover {
+  background: rgba(99,102,241,.15);
+  color: #a5b4fc;
+}
+.lp-mobile-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  background: none;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 1.3rem;
+  padding: .35rem .55rem;
+  cursor: pointer;
+  transition: all .2s;
+  line-height: 1;
+}
+.lp-mobile-close:hover {
+  color: #fff;
+  border-color: rgba(248,113,113,.5);
+  background: rgba(248,113,113,.1);
+}
+
+/* ── Tablet (< 992px) ──────────────────────────────────── */
 @media (max-width: 992px) {
   .bento-grid         { grid-template-columns: 1fr 1fr; }
   .bento-card.wide    { grid-column: span 1; }
   .workflow-grid      { grid-template-columns: 1fr; gap: 3rem; }
   .stats-grid         { grid-template-columns: repeat(2,1fr); }
+
+  .features-section,
+  .workflow-section,
+  .roles-section,
+  .cta-section { padding: 5rem 0; }
+
+  .section-header { margin-bottom: 3rem; }
 }
 
+/* ── Mobile (< 768px) ──────────────────────────────────── */
 @media (max-width: 768px) {
   .bento-grid    { grid-template-columns: 1fr; }
   .roles-grid    { grid-template-columns: 1fr; }
   .lp-nav-links  { display: none; }
+  .lp-hamburger  { display: flex; }
   .hero-stats    { gap: 1.5rem; }
   .stats-grid    { grid-template-columns: repeat(2,1fr); }
+
+  .hero { padding: 6rem 0 3.5rem; }
+  .hero-btns { margin-bottom: 3rem; }
+
+  .features-section,
+  .workflow-section,
+  .roles-section,
+  .cta-section { padding: 4rem 0; }
+
+  .section-header { margin-bottom: 2.5rem; }
+  .s-sub { font-size: .95rem; }
+
+  /* Bento cards */
+  .bento-card { padding: 1.35rem; }
+
+  /* Pipeline card */
+  .pipeline-card { padding: 1.5rem; }
+  .pipe-stage { padding: .5rem .75rem; font-size: .78rem; }
+
+  /* Role cards */
+  .role-card { padding: 1.5rem; }
+  .role-emoji { font-size: 1.8rem; }
+
+  /* Stats section */
+  .stats-section { padding: 4rem 0; }
+  .stat-counter-num { font-size: 2.2rem; }
+  .stat-counter-card { padding: 1.5rem .75rem; }
+
+  /* Workflow steps */
+  .wf-step { padding: .9rem; }
+
+  /* Ticker */
+  .ticker-item { padding: 0 1.5rem; font-size: .72rem; }
+
+  /* Footer */
+  .footer-inner { flex-direction: column; text-align: center; gap: .75rem; }
+  .footer-links { justify-content: center; }
+}
+
+/* ── Extra-small (< 480px) ─────────────────────────────── */
+@media (max-width: 480px) {
+  .hero h1 { font-size: 2.2rem; }
+  .hero-sub { font-size: .92rem; }
+  .hero-pill { font-size: .7rem; padding: .3rem .85rem; }
+
+  .btn-primary-glow { padding: .75rem 1.5rem; font-size: .9rem; }
+  .btn-outline-glow { padding: .75rem 1.3rem; font-size: .9rem; }
+
+  .hero-stat-num { font-size: 1.6rem; }
+  .hero-stat-label { font-size: .65rem; }
+  .hero-stats { gap: 1rem; }
+
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .stat-counter-num { font-size: 1.8rem; }
+  .stat-counter-label { font-size: .72rem; }
+
+  .bento-card { padding: 1.15rem; border-radius: 14px; }
+  .bento-icon { width: 42px; height: 42px; font-size: 1.1rem; margin-bottom: 1rem; }
+  .bento-title { font-size: .95rem; }
+  .bento-desc { font-size: .82rem; }
+
+  .lp-nav .inner { padding: 0 1rem; }
+  .section-inner { padding: 0 1rem; }
+  .hero-inner { padding: 0 1rem; }
+  .cta-inner { padding: 0 1rem; }
+
+  .lp-signin-btn { padding: .45rem 1rem; font-size: .78rem; }
+
+  .features-section,
+  .workflow-section,
+  .roles-section,
+  .cta-section { padding: 3rem 0; }
+
+  .section-header { margin-bottom: 2rem; }
+
+  .role-card { padding: 1.25rem; border-radius: 16px; }
+  .role-title { font-size: 1.05rem; }
+  .role-desc { font-size: .8rem; }
+  .role-perms li { font-size: .78rem; }
+
+  .pipeline-card { padding: 1.25rem; border-radius: 16px; }
+
+  .cta-title { font-size: 1.8rem; }
+  .cta-sub { font-size: .95rem; }
 }

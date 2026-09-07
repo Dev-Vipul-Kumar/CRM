@@ -10,7 +10,7 @@ SECRET_KEY = "django-insecure-e+(+6pdqd5$_3xtlrw&n2s&5rgy3qq9h8qam-bj_dt1v9lewtp
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://crm-xhtj.onrender.com','*']
+ALLOWED_HOSTS = ['crm-xhtj.onrender.com','*']
 
 # Application definition
 INSTALLED_APPS = [

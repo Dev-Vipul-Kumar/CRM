@@ -405,6 +405,12 @@
 .ap-tab.active{color:var(--ap-p1);border-bottom-color:var(--ap-p1);}
 
 /* ── Responsive ────────────────────────────────────────────── */
+@media(max-width:991px){
+  .ap-sidebar{transform:translateX(-100%);}
+  .ap-sidebar.open{transform:translateX(0);}
+  .ap-main{margin-left:0;}
+}
+
 @media(max-width:768px){
   .ap-sidebar{transform:translateX(-100%);}
   .ap-sidebar.open{transform:translateX(0);}
@@ -512,9 +518,33 @@ a:hover { color:var(--ap-p2); }
   .ap-sidebar { z-index: 600; }
 }
 
-/* ── Extra-small (< 480px) ─────────────────────────────── */
+/* ── Extra-small (<480px) ─────────────────────────────── */
 @media (max-width: 480px) {
   .ap-action-grid { grid-template-columns: repeat(3, 1fr); gap: .5rem; }
   .ap-stat-val { font-size: 1.15rem; }
   .ap-topbar-right .ap-topbar-btn { padding: .28rem .45rem; }
+
+  /* Cards */
+  .ap-card-body { padding: .75rem; }
+  .ap-card-header { padding: .65rem .85rem; flex-wrap: wrap; gap: .4rem; }
+  .ap-card-title { font-size: .8rem; }
+
+  /* Tables */
+  .ap-table { font-size: .72rem; }
+  .ap-table thead th { font-size: .6rem; padding: .4rem .5rem; }
+  .ap-table tbody td { padding: .5rem .5rem; }
+
+  /* Stat icon */
+  .ap-stat-icon { width: 34px; height: 34px; font-size: .9rem; }
+  .ap-stat { padding: .65rem .75rem; gap: .6rem; }
+
+  /* Buttons */
+  .ap-btn { font-size: .68rem; padding: .25rem .5rem; }
+  .ap-btn-sm { font-size: .62rem; padding: .18rem .38rem; }
+
+  /* Section title */
+  .ap-section-title { font-size: .6rem; }
 }
+
+/* ── Table container overflow protection ─────────────── */
+.ap-card-body { overflow-x: auto; -webkit-overflow-scrolling: touch; }
