@@ -2,6 +2,15 @@
 {% block title %}Users{% endblock %}
 {% block nav_users %}active{% endblock %}
 
+{% block extra_css %}
+<style>
+@media (max-width:767px){
+  .usr-dept,.usr-joined,.usr-last-login{display:none;}
+  .usr-email{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;display:block;}
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
   <div>
@@ -9,47 +18,47 @@
     <p class="page-subtitle">Manage system users and their roles</p>
   </div>
   <a href="{% url 'accounts:user_create' %}" class="btn btn-primary">
-    <i class="bi bi-person-plus me-1"></i> Add User
+    <i class="bi bi-person-plus me-1"></i><span class="d-none d-sm-inline">Add User</span><span class="d-sm-none">Add</span>
   </a>
 </div>
 
 <!-- Filters -->
-<div class="card mb-4">
-  <div class="card-body py-3">
-    <form method="get" class="filter-form row g-2 align-items-end">
-      <div class="col-md-4">
-        <input type="text" name="search" class="form-control form-control-sm"
-               placeholder="Search name, email, username…" value="{{ search }}">
-      </div>
-      <div class="col-md-2">
-        <select name="role" class="form-select form-select-sm auto-filter">
-          <option value="">All Roles</option>
-          {% for val, label in roles %}
-            <option value="{{ val }}" {% if role_filter == val %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-md-2">
-        <select name="status" class="form-select form-select-sm auto-filter">
-          <option value="">All Statuses</option>
-          {% for val, label in statuses %}
-            <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-md-2">
-        <select name="department" class="form-select form-select-sm auto-filter">
-          <option value="">All Departments</option>
-          {% for dept in departments %}
-            <option value="{{ dept.pk }}" {% if dept_filter == dept.pk|stringformat:"s" %}selected{% endif %}>
-              {{ dept.name }}
-            </option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-auto">
-        <button type="submit" class="btn btn-primary btn-sm">Search</button>
-        <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-secondary btn-sm ms-1">Clear</a>
+<div class="card mb-3">
+  <div class="card-body py-3 px-3">
+    <form method="get">
+      <div class="row g-2">
+        <div class="col-12 col-sm-6 col-md-4">
+          <input type="text" name="search" class="form-control form-control-sm"
+                 placeholder="Name, email, username…" value="{{ search }}">
+        </div>
+        <div class="col-6 col-sm-4 col-md-2">
+          <select name="role" class="form-select form-select-sm auto-filter">
+            <option value="">All Roles</option>
+            {% for val, label in roles %}
+              <option value="{{ val }}" {% if role_filter == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-6 col-sm-4 col-md-2">
+          <select name="status" class="form-select form-select-sm auto-filter">
+            <option value="">All Statuses</option>
+            {% for val, label in statuses %}
+              <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-6 col-sm-4 col-md-2">
+          <select name="department" class="form-select form-select-sm auto-filter">
+            <option value="">All Depts</option>
+            {% for dept in departments %}
+              <option value="{{ dept.pk }}" {% if dept_filter == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-6 col-sm-12 col-md-2 d-flex gap-1">
+          <button type="submit" class="btn btn-primary btn-sm flex-fill">Search</button>
+          <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-secondary btn-sm flex-fill">Clear</a>
+        </div>
       </div>
     </form>
   </div>
@@ -62,10 +71,10 @@
         <tr>
           <th>User</th>
           <th>Role</th>
-          <th>Department</th>
+          <th class="usr-dept">Dept</th>
           <th>Status</th>
-          <th>Joined</th>
-          <th>Last Login</th>
+          <th class="usr-joined">Joined</th>
+          <th class="usr-last-login">Last Login</th>
           <th class="text-end">Actions</th>
         </tr>
       </thead>
@@ -74,35 +83,31 @@
         <tr>
           <td>
             <div class="d-flex align-items-center gap-2">
-              <div class="topbar-avatar" style="width:32px;height:32px;font-size:.75rem;">
+              <div class="topbar-avatar" style="width:30px;height:30px;font-size:.72rem;flex-shrink:0;">
                 {{ user.username|first|upper }}
               </div>
-              <div>
-                <div class="fw-600">{{ user.full_name }}</div>
-                <div class="text-muted" style="font-size:.78rem;">{{ user.username }} · {{ user.email }}</div>
+              <div style="min-width:0;">
+                <div class="fw-600" style="font-size:.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;">{{ user.full_name }}</div>
+                <div class="usr-email text-muted">{{ user.username }}{% if user.email %} · {{ user.email }}{% endif %}</div>
               </div>
             </div>
           </td>
           <td>
-            <span class="status-badge {% if user.role == 'ADMIN' %}badge-primary{% elif user.role == 'MANAGER' %}badge-info{% else %}badge-secondary{% endif %}">
+            <span class="status-badge {% if user.role == 'ADMIN' %}badge-primary{% elif user.role == 'MANAGER' %}badge-info{% else %}badge-secondary{% endif %}" style="font-size:.68rem;">
               {{ user.get_role_display }}
             </span>
           </td>
-          <td>{{ user.department.name|default:"—" }}</td>
+          <td class="usr-dept" style="font-size:.82rem;">{{ user.department.name|default:"—" }}</td>
           <td>
-            <span class="status-badge {% if user.status == 'ACTIVE' %}badge-active{% else %}badge-danger{% endif %}">
+            <span class="status-badge {% if user.status == 'ACTIVE' %}badge-active{% else %}badge-danger{% endif %}" style="font-size:.68rem;">
               {{ user.get_status_display }}
             </span>
           </td>
-          <td style="font-size:.8rem;">{{ user.date_joined|date:"d M Y" }}</td>
-          <td style="font-size:.8rem;">{{ user.last_login|date:"d M Y H:i"|default:"Never" }}</td>
-          <td class="text-end">
-            <a href="{% url 'accounts:user_detail' user.pk %}" class="btn btn-sm btn-outline-primary">
-              <i class="bi bi-eye"></i>
-            </a>
-            <a href="{% url 'accounts:user_edit' user.pk %}" class="btn btn-sm btn-outline-secondary">
-              <i class="bi bi-pencil"></i>
-            </a>
+          <td class="usr-joined" style="font-size:.78rem;white-space:nowrap;">{{ user.date_joined|date:"d M Y" }}</td>
+          <td class="usr-last-login" style="font-size:.78rem;white-space:nowrap;">{{ user.last_login|date:"d M Y"|default:"Never" }}</td>
+          <td class="text-end" style="white-space:nowrap;">
+            <a href="{% url 'accounts:user_detail' user.pk %}" class="btn btn-sm btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+            <a href="{% url 'accounts:user_edit' user.pk %}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
           </td>
         </tr>
         {% empty %}
@@ -112,22 +117,16 @@
     </table>
   </div>
   {% if page_obj.has_other_pages %}
-  <div class="card-footer d-flex justify-content-between align-items-center">
-    <small class="text-muted">
-      Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}
-    </small>
+  <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <small class="text-muted d-none d-sm-block">{{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</small>
     <nav><ul class="pagination pagination-sm mb-0">
-      {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&role={{ role_filter }}&status={{ status_filter }}&department={{ dept_filter }}">‹</a></li>
-      {% endif %}
+      {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&role={{ role_filter }}&status={{ status_filter }}&department={{ dept_filter }}">‹</a></li>{% endif %}
       {% for num in page_obj.paginator.page_range %}
-        <li class="page-item {% if num == page_obj.number %}active{% endif %}">
-          <a class="page-link" href="?page={{ num }}&search={{ search }}&role={{ role_filter }}&status={{ status_filter }}&department={{ dept_filter }}">{{ num }}</a>
-        </li>
+        {% if num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+          <li class="page-item {% if num == page_obj.number %}active{% endif %}"><a class="page-link" href="?page={{ num }}&search={{ search }}&role={{ role_filter }}&status={{ status_filter }}&department={{ dept_filter }}">{{ num }}</a></li>
+        {% endif %}
       {% endfor %}
-      {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}&role={{ role_filter }}&status={{ status_filter }}&department={{ dept_filter }}">›</a></li>
-      {% endif %}
+      {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}&role={{ role_filter }}&status={{ status_filter }}&department={{ dept_filter }}">›</a></li>{% endif %}
     </ul></nav>
   </div>
   {% endif %}

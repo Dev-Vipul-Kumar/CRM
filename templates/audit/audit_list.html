@@ -2,6 +2,16 @@
 {% block title %}Audit Log{% endblock %}
 {% block nav_audit %}active{% endblock %}
 
+{% block extra_css %}
+<style>
+@media (max-width:767px) {
+  .aud-module,.aud-ip,.aud-desc-full { display:none; }
+  .aud-desc-short { display:block !important; }
+}
+.aud-desc-short { display:none; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
   <div>
@@ -11,13 +21,15 @@
 </div>
 
 <!-- Filters -->
-<div class="card mb-4">
-  <div class="card-body py-3">
-    <form method="get" class="filter-form row g-2 align-items-end">
-        <div class="col-md-3">
-          <input type="text" name="search" class="form-control form-control-sm" placeholder="Search description…" value="{{ search }}">
+<div class="card mb-3">
+  <div class="card-body py-3 px-3">
+    <form method="get">
+      <div class="row g-2">
+        <div class="col-12 col-sm-5 col-md-4">
+          <input type="text" name="search" class="form-control form-control-sm"
+                 placeholder="Search description…" value="{{ search }}">
         </div>
-        <div class="col-md-2">
+        <div class="col-6 col-sm-3 col-md-2">
           <select name="action" class="form-select form-select-sm auto-filter">
             <option value="">All Actions</option>
             {% for val, label in actions %}
@@ -25,12 +37,13 @@
             {% endfor %}
           </select>
         </div>
-        <div class="col-md-2">
-          <input type="text" name="user" class="form-control form-control-sm" placeholder="Username…" value="{{ user_filter }}">
+        <div class="col-6 col-sm-3 col-md-2">
+          <input type="text" name="user" class="form-control form-control-sm"
+                 placeholder="Username…" value="{{ user_filter }}">
         </div>
-        <div class="col-auto">
-          <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-          <a href="{% url 'audit:audit_list' %}" class="btn btn-outline-secondary btn-sm ms-1">Clear</a>
+        <div class="col-12 col-sm-12 col-md-auto d-flex gap-1">
+          <button type="submit" class="btn btn-primary btn-sm flex-fill flex-md-grow-0">Filter</button>
+          <a href="{% url 'audit:audit_list' %}" class="btn btn-outline-secondary btn-sm flex-fill flex-md-grow-0">Clear</a>
         </div>
       </div>
     </form>
@@ -41,32 +54,41 @@
   <div class="table-responsive">
     <table class="table mb-0">
       <thead>
-        <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Module</th><th>Description</th><th>IP</th></tr>
+        <tr>
+          <th style="white-space:nowrap;">Time</th>
+          <th>User</th>
+          <th>Action</th>
+          <th class="aud-module">Module</th>
+          <th class="aud-desc-full">Description</th>
+          <th class="aud-desc-short">Details</th>
+          <th class="aud-ip">IP</th>
+        </tr>
       </thead>
       <tbody>
         {% for log in page_obj %}
         <tr>
-          <td style="font-size:.78rem;white-space:nowrap;">{{ log.timestamp|date:"d M Y H:i:s" }}</td>
-          <td style="font-size:.85rem;">{{ log.user.username|default:"System" }}</td>
+          <td style="font-size:.75rem;white-space:nowrap;">{{ log.timestamp|date:"d M H:i" }}</td>
+          <td style="font-size:.82rem;white-space:nowrap;">{{ log.user.username|default:"System"|truncatechars:14 }}</td>
           <td>
-            <span class="badge {% if log.action == 'CREATE' %}bg-success{% elif log.action == 'DELETE' %}bg-danger{% elif log.action == 'LOGIN' %}bg-primary{% elif log.action == 'APPROVE' %}bg-primary{% else %}bg-secondary{% endif %}" style="font-size:.7rem;">
+            <span class="badge {% if log.action == 'CREATE' %}bg-success{% elif log.action == 'DELETE' %}bg-danger{% elif log.action == 'LOGIN' or log.action == 'APPROVE' %}bg-primary{% else %}bg-secondary{% endif %}" style="font-size:.65rem;">
               {{ log.action }}
             </span>
           </td>
-          <td style="font-size:.8rem;">{{ log.module }}</td>
-          <td style="font-size:.85rem;">{{ log.description|truncatechars:80 }}</td>
-          <td style="font-size:.78rem;color:var(--text-muted);">{{ log.ip_address|default:"—" }}</td>
+          <td class="aud-module" style="font-size:.78rem;">{{ log.module }}</td>
+          <td class="aud-desc-full" style="font-size:.82rem;">{{ log.description|truncatechars:70 }}</td>
+          <td class="aud-desc-short" style="font-size:.75rem;">{{ log.description|truncatechars:35 }}</td>
+          <td class="aud-ip" style="font-size:.72rem;color:var(--text-muted);">{{ log.ip_address|default:"—" }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="6" class="text-center py-5 text-muted">No audit entries found.</td></tr>
+        <tr><td colspan="7" class="text-center py-5 text-muted">No audit entries found.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
   {% if page_obj.has_other_pages %}
-  <div class="card-footer d-flex justify-content-between align-items-center">
-    <small class="text-muted">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</small>
+  <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <small class="text-muted d-none d-sm-block">{{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</small>
     <nav><ul class="pagination pagination-sm mb-0">
       {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&action={{ action_filter }}&user={{ user_filter }}">‹</a></li>{% endif %}
       {% for num in page_obj.paginator.page_range %}

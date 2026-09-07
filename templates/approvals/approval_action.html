@@ -5,32 +5,79 @@
 {% block content %}
 <div class="page-header">
   <div>
-    <nav aria-label="breadcrumb"><ol class="breadcrumb">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb mb-1">
       <li class="breadcrumb-item"><a href="{% url 'approvals:approval_list' %}">Approvals</a></li>
       <li class="breadcrumb-item active">Review</li>
     </ol></nav>
     <h1 class="page-title">Review Contract</h1>
-    <p class="page-subtitle">{{ contract.contract_number }} — {{ contract.title }}</p>
+    <p class="page-subtitle" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ contract.contract_number }} — {{ contract.title }}</p>
   </div>
 </div>
 
-<div class="row g-4">
-  <div class="col-md-12 col-lg-8">
+<div class="row g-3">
+
+  <!-- Document (mobile: first) -->
+  <div class="col-12 col-lg-4 order-1 order-lg-2">
+    {% with cv=contract.current_version %}
+    {% if cv and cv.document %}
+    <div class="card mb-3">
+      <div class="card-header"><span class="card-title">Document</span></div>
+      <div class="card-body">
+        <p style="font-size:.85rem;" class="mb-2">Version {{ cv.version_number }}</p>
+        <a href="{% url 'contracts:download_document' cv.pk %}" class="btn btn-outline-primary btn-sm w-100">
+          <i class="bi bi-download me-1"></i>Download & Review
+        </a>
+      </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main content -->
+  <div class="col-12 col-lg-8 order-2 order-lg-1">
+
+    <!-- Contract summary -->
     <div class="card mb-3">
       <div class="card-header"><span class="card-title">Contract Summary</span></div>
-      <div class="card-body">
-        <dl class="row mb-0">
-          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Contract #</dt><dd class="col-sm-8">{{ contract.contract_number }}</dd>
-          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Title</dt><dd class="col-sm-8">{{ contract.title }}</dd>
-          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Vendor</dt><dd class="col-sm-8">{{ contract.party_name }}</dd>
-          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Value</dt><dd class="col-sm-8">{% if contract.contract_value %}₹ {{ contract.contract_value|floatformat:2 }}{% else %}—{% endif %}</dd>
-          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Start Date</dt><dd class="col-sm-8">{{ contract.start_date|date:"d M Y" }}</dd>
-          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">End Date</dt><dd class="col-sm-8">{{ contract.end_date|date:"d M Y" }}</dd>
-          <dt class="col-sm-4 text-muted" style="font-size:.82rem;">Owner</dt><dd class="col-sm-8">{{ contract.owner.full_name|default:"—" }}</dd>
-        </dl>
+      <div class="card-body p-3">
+        <div class="row g-2">
+          <div class="col-6">
+            <small class="text-muted d-block" style="font-size:.72rem;">Contract #</small>
+            <span style="font-size:.875rem;font-weight:600;">{{ contract.contract_number }}</span>
+          </div>
+          <div class="col-6">
+            <small class="text-muted d-block" style="font-size:.72rem;">Status</small>
+            <span class="status-badge badge-{{ contract.status_badge_class }}" style="font-size:.68rem;">{{ contract.get_status_display }}</span>
+          </div>
+          <div class="col-12">
+            <small class="text-muted d-block" style="font-size:.72rem;">Title</small>
+            <span style="font-size:.875rem;">{{ contract.title }}</span>
+          </div>
+          <div class="col-6">
+            <small class="text-muted d-block" style="font-size:.72rem;">Vendor</small>
+            <span style="font-size:.875rem;">{{ contract.party_name }}</span>
+          </div>
+          <div class="col-6">
+            <small class="text-muted d-block" style="font-size:.72rem;">Value</small>
+            <span style="font-size:.875rem;">{% if contract.contract_value %}₹ {{ contract.contract_value|floatformat:2 }}{% else %}—{% endif %}</span>
+          </div>
+          <div class="col-6">
+            <small class="text-muted d-block" style="font-size:.72rem;">Start Date</small>
+            <span style="font-size:.875rem;">{{ contract.start_date|date:"d M Y" }}</span>
+          </div>
+          <div class="col-6">
+            <small class="text-muted d-block" style="font-size:.72rem;">End Date</small>
+            <span style="font-size:.875rem;">{{ contract.end_date|date:"d M Y" }}</span>
+          </div>
+          <div class="col-12">
+            <small class="text-muted d-block" style="font-size:.72rem;">Owner</small>
+            <span style="font-size:.875rem;">{{ contract.owner.full_name|default:"—" }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
+    <!-- Decision form -->
     <div class="card">
       <div class="card-header"><span class="card-title">Your Decision</span></div>
       <div class="card-body">
@@ -49,29 +96,14 @@
             <label class="form-label">Comment</label>
             {{ form.comment }}
           </div>
-          <div class="d-flex gap-2">
+          <div class="d-flex gap-2 flex-wrap">
             <button type="submit" class="btn btn-primary">Submit Decision</button>
             <a href="{% url 'contracts:contract_detail' contract.pk %}" class="btn btn-outline-secondary">Cancel</a>
           </div>
         </form>
       </div>
     </div>
-  </div>
 
-  <div class="col-md-12 col-lg-4">
-    {% with cv=contract.current_version %}
-    {% if cv and cv.document %}
-    <div class="card">
-      <div class="card-header"><span class="card-title">Document</span></div>
-      <div class="card-body">
-        <p style="font-size:.85rem;" class="mb-2">Version {{ cv.version_number }}</p>
-        <a href="{% url 'contracts:download_document' cv.pk %}" class="btn btn-outline-primary btn-sm">
-          <i class="bi bi-download me-1"></i>Download
-        </a>
-      </div>
-    </div>
-    {% endif %}
-    {% endwith %}
   </div>
 </div>
 {% endblock %}

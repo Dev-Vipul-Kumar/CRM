@@ -4,32 +4,35 @@
 
 {% block content %}
 <div class="page-header">
-  <div>
-    <h1 class="page-title">Departments</h1>
-  </div>
+  <div><h1 class="page-title">Departments</h1></div>
   <a href="{% url 'accounts:department_create' %}" class="btn btn-primary">
-    <i class="bi bi-plus-lg me-1"></i>Add Department
+    <i class="bi bi-plus-lg me-1"></i><span class="d-none d-sm-inline">Add Department</span><span class="d-sm-none">Add</span>
   </a>
 </div>
 
 <div class="card">
   <div class="table-responsive">
     <table class="table mb-0">
-      <thead><tr><th>Name</th><th>Description</th><th>Users</th><th class="text-end">Actions</th></tr></thead>
+      <thead><tr>
+        <th>Name</th>
+        <th class="d-none d-sm-table-cell">Description</th>
+        <th>Users</th>
+        <th class="text-end">Actions</th>
+      </tr></thead>
       <tbody>
         {% for dept in departments %}
         <tr>
           <td class="fw-600">{{ dept.name }}</td>
-          <td class="text-muted">{{ dept.description|default:"—" }}</td>
+          <td class="d-none d-sm-table-cell text-muted" style="font-size:.85rem;max-width:200px;">{{ dept.description|default:"—"|truncatechars:50 }}</td>
           <td>{{ dept.users.count }}</td>
-          <td class="text-end">
-            <a href="{% url 'accounts:department_edit' dept.pk %}" class="btn btn-sm btn-outline-secondary">
+          <td class="text-end" style="white-space:nowrap;">
+            <a href="{% url 'accounts:department_edit' dept.pk %}" class="btn btn-sm btn-outline-secondary" title="Edit">
               <i class="bi bi-pencil"></i>
             </a>
             <form method="POST" action="{% url 'accounts:department_delete' dept.pk %}" class="d-inline">
               {% csrf_token %}
               <button class="btn btn-sm btn-outline-danger" type="submit"
-                      data-confirm="Delete department '{{ dept.name }}'?">
+                      data-confirm="Delete department '{{ dept.name }}'?" title="Delete">
                 <i class="bi bi-trash"></i>
               </button>
             </form>

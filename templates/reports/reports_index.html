@@ -8,55 +8,62 @@
     <h1 class="page-title">Reports</h1>
     <p class="page-subtitle">Contract analytics and exports</p>
   </div>
-  <a href="{% url 'reports:export_csv' %}" class="btn btn-success">
-    <i class="bi bi-download me-1"></i>Export All (CSV)
+  <a href="{% url 'reports:export_csv' %}" class="btn btn-success btn-sm">
+    <i class="bi bi-download me-1"></i><span class="d-none d-sm-inline">Export All (CSV)</span><span class="d-sm-none">Export</span>
   </a>
 </div>
 
-<!-- Status summary -->
-<div class="row g-3 mb-4">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Contracts by Status</span>
-        <span class="text-muted" style="font-size:.85rem;">Total: {{ total }}</span>
-      </div>
-      <div class="card-body">
-        <div class="row g-3">
-          {% for status, count in status_counts.items %}
-          <div class="col-6 col-md-3 col-lg-2">
-            <div class="text-center p-2" style="border:1px solid var(--border);border-radius:8px;">
-              <div style="font-size:1.5rem;font-weight:700;">{{ count }}</div>
-              <div style="font-size:.72rem;color:var(--text-muted);">{{ status }}</div>
-            </div>
-          </div>
-          {% endfor %}
+<!-- Status counts — 2-per-row on mobile, 3 on sm, 6 on lg -->
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Contracts by Status</span>
+    <span class="text-muted" style="font-size:.82rem;">Total: {{ total }}</span>
+  </div>
+  <div class="card-body">
+    <div class="row g-2">
+      {% for status, count in status_counts.items %}
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+        <div class="text-center p-2" style="border:1px solid var(--border);border-radius:8px;">
+          <div style="font-size:1.4rem;font-weight:800;color:var(--text-main);">{{ count }}</div>
+          <div style="font-size:.65rem;color:var(--text-muted);margin-top:.1rem;">{{ status }}</div>
         </div>
       </div>
+      {% endfor %}
     </div>
   </div>
 </div>
 
-<div class="row g-4">
+<!-- Row 2: expiring table + two lists -->
+<div class="row g-3">
 
-  <!-- Expiring soon -->
-  <div class="col-lg-6 col-md-12">
+  <!-- Expiring soon table -->
+  <div class="col-12 col-lg-6">
     <div class="card">
       <div class="card-header">
-        <span class="card-title text-warning"><i class="bi bi-clock-history me-1"></i>Expiring in 30 Days</span>
-        <a href="{% url 'reports:export_csv' %}?status=EXPIRING_SOON" class="btn btn-sm btn-outline-success">Export</a>
+        <span class="card-title" style="color:var(--warning);"><i class="bi bi-clock-history me-1"></i>Expiring in 30 Days</span>
+        <a href="{% url 'reports:export_csv' %}?status=EXPIRING_SOON" class="btn btn-sm btn-outline-success">
+          <i class="bi bi-download"></i>
+        </a>
       </div>
       <div class="table-responsive">
         <table class="table mb-0">
-          <thead><tr><th>Contract #</th><th>Title</th><th>End Date</th><th>Days Left</th></tr></thead>
+          <thead><tr>
+            <th>Contract</th>
+            <th class="d-none d-sm-table-cell">Title</th>
+            <th>End Date</th>
+            <th>Days</th>
+          </tr></thead>
           <tbody>
             {% for c in expiring_soon %}
             <tr>
-              <td><a href="{% url 'contracts:contract_detail' c.pk %}" class="text-primary">{{ c.contract_number }}</a></td>
-              <td style="font-size:.85rem;">{{ c.title|truncatechars:35 }}</td>
-              <td style="font-size:.8rem;">{{ c.end_date|date:"d M Y" }}</td>
               <td>
-                <span class="badge {% if c.days_until_expiry <= 7 %}bg-danger{% else %}bg-warning{% endif %}">
+                <a href="{% url 'contracts:contract_detail' c.pk %}" style="color:var(--p1);white-space:nowrap;font-size:.85rem;">{{ c.contract_number }}</a>
+                <div class="d-sm-none text-muted" style="font-size:.72rem;">{{ c.title|truncatechars:25 }}</div>
+              </td>
+              <td class="d-none d-sm-table-cell" style="font-size:.82rem;">{{ c.title|truncatechars:30 }}</td>
+              <td style="font-size:.78rem;white-space:nowrap;">{{ c.end_date|date:"d M Y" }}</td>
+              <td>
+                <span class="badge {% if c.days_until_expiry <= 7 %}bg-danger{% else %}bg-warning{% endif %}" style="font-size:.68rem;">
                   {{ c.days_until_expiry }}d
                 </span>
               </td>
@@ -70,38 +77,37 @@
     </div>
   </div>
 
-  <!-- By category -->
-  <div class="col-lg-3 col-md-6">
-    <div class="card">
+  <!-- By category + by department — each half on tablet, full on mobile -->
+  <div class="col-6 col-lg-3">
+    <div class="card h-100">
       <div class="card-header"><span class="card-title">By Category</span></div>
       <div class="card-body p-0">
         <ul class="list-group list-group-flush">
           {% for row in by_category %}
-          <li class="list-group-item d-flex justify-content-between py-2 px-3" style="font-size:.875rem;">
-            <span>{{ row.contract_type__name|default:"Uncategorised" }}</span>
-            <span class="badge bg-primary rounded-pill">{{ row.count }}</span>
+          <li class="list-group-item d-flex justify-content-between py-2 px-3" style="font-size:.82rem;">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;">{{ row.contract_type__name|default:"Uncategorised" }}</span>
+            <span class="badge bg-primary rounded-pill" style="font-size:.68rem;">{{ row.count }}</span>
           </li>
           {% empty %}
-          <li class="list-group-item text-center text-muted py-3">No data.</li>
+          <li class="list-group-item text-center text-muted py-3" style="font-size:.82rem;">No data.</li>
           {% endfor %}
         </ul>
       </div>
     </div>
   </div>
 
-  <!-- By department -->
-  <div class="col-lg-3 col-md-6">
-    <div class="card">
+  <div class="col-6 col-lg-3">
+    <div class="card h-100">
       <div class="card-header"><span class="card-title">By Department</span></div>
       <div class="card-body p-0">
         <ul class="list-group list-group-flush">
           {% for row in by_department %}
-          <li class="list-group-item d-flex justify-content-between py-2 px-3" style="font-size:.875rem;">
-            <span>{{ row.department__name|default:"Unassigned" }}</span>
-            <span class="badge bg-primary rounded-pill">{{ row.count }}</span>
+          <li class="list-group-item d-flex justify-content-between py-2 px-3" style="font-size:.82rem;">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;">{{ row.department__name|default:"Unassigned" }}</span>
+            <span class="badge bg-primary rounded-pill" style="font-size:.68rem;">{{ row.count }}</span>
           </li>
           {% empty %}
-          <li class="list-group-item text-center text-muted py-3">No data.</li>
+          <li class="list-group-item text-center text-muted py-3" style="font-size:.82rem;">No data.</li>
           {% endfor %}
         </ul>
       </div>

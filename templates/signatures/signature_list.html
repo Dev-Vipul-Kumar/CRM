@@ -2,6 +2,14 @@
 {% block title %}Signatures{% endblock %}
 {% block nav_signatures %}active{% endblock %}
 
+{% block extra_css %}
+<style>
+@media (max-width:767px) {
+  .sig-requested,.sig-signed { display:none; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
   <div>
@@ -14,29 +22,37 @@
   <div class="table-responsive">
     <table class="table mb-0">
       <thead>
-        <tr><th>Contract</th><th>Signer</th><th>Status</th><th>Requested</th><th>Signed At</th><th class="text-end">Action</th></tr>
+        <tr>
+          <th>Contract</th>
+          <th>Signer</th>
+          <th>Status</th>
+          <th class="sig-requested">Requested</th>
+          <th class="sig-signed">Signed At</th>
+          <th class="text-end">Action</th>
+        </tr>
       </thead>
       <tbody>
         {% for sig in page_obj %}
         <tr>
-          <td><a href="{% url 'contracts:contract_detail' sig.contract.pk %}" class="text-primary fw-500">{{ sig.contract.contract_number }}</a>
-            <div class="text-muted" style="font-size:.75rem;">{{ sig.contract.title|truncatechars:35 }}</div>
-          </td>
-          <td>{{ sig.signer.full_name|default:"—" }}</td>
           <td>
-            <span class="status-badge {% if sig.status == 'SIGNED' %}badge-signed{% elif sig.status == 'REJECTED' %}badge-rejected{% else %}badge-pending{% endif %}">
+            <a href="{% url 'contracts:contract_detail' sig.contract.pk %}" class="fw-500" style="color:var(--p1);white-space:nowrap;font-size:.855rem;">{{ sig.contract.contract_number }}</a>
+            <div class="text-muted" style="font-size:.72rem;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ sig.contract.title }}</div>
+          </td>
+          <td style="font-size:.85rem;white-space:nowrap;">{{ sig.signer.full_name|default:"—"|truncatechars:18 }}</td>
+          <td>
+            <span class="status-badge {% if sig.status == 'SIGNED' %}badge-signed{% elif sig.status == 'REJECTED' %}badge-rejected{% else %}badge-pending{% endif %}" style="font-size:.68rem;">
               {{ sig.get_status_display }}
             </span>
           </td>
-          <td style="font-size:.8rem;">{{ sig.requested_at|date:"d M Y" }}</td>
-          <td style="font-size:.8rem;">{{ sig.signed_at|date:"d M Y H:i"|default:"—" }}</td>
-          <td class="text-end">
+          <td class="sig-requested" style="font-size:.78rem;white-space:nowrap;">{{ sig.requested_at|date:"d M Y" }}</td>
+          <td class="sig-signed" style="font-size:.78rem;white-space:nowrap;">{{ sig.signed_at|date:"d M Y"|default:"—" }}</td>
+          <td class="text-end" style="white-space:nowrap;">
             {% if sig.status == 'PENDING' and sig.signer == request.user %}
             <a href="{% url 'signatures:sign_contract' sig.pk %}" class="btn btn-sm btn-primary">
-              <i class="bi bi-pen me-1"></i>Sign
+              <i class="bi bi-pen"></i><span class="d-none d-sm-inline ms-1">Sign</span>
             </a>
             {% endif %}
-            <a href="{% url 'signatures:signature_detail' sig.pk %}" class="btn btn-sm btn-outline-secondary">
+            <a href="{% url 'signatures:signature_detail' sig.pk %}" class="btn btn-sm btn-outline-secondary" title="View">
               <i class="bi bi-eye"></i>
             </a>
           </td>

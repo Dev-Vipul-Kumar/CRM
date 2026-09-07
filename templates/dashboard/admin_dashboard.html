@@ -101,20 +101,23 @@
       <div class="table-responsive">
         <table class="table mb-0">
           <thead><tr>
-            <th>Number</th><th>Title</th><th>Status</th><th>Expiry</th>
+            <th>Number</th><th class="d-none d-sm-table-cell">Title</th><th>Status</th><th>Expiry</th>
           </tr></thead>
           <tbody>
             {% for c in recent_contracts %}
             <tr>
-              <td><a href="{% url 'contracts:contract_detail' c.pk %}" class="text-primary fw-500">{{ c.contract_number }}</a></td>
-              <td>{{ c.title|truncatechars:40 }}</td>
               <td>
-                <span class="status-badge badge-{{ c.status_badge_class }}">{{ c.get_status_display }}</span>
+                <a href="{% url 'contracts:contract_detail' c.pk %}" class="text-primary fw-500" style="white-space:nowrap;font-size:.855rem;">{{ c.contract_number }}</a>
+                <div class="d-sm-none text-muted" style="font-size:.72rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.title }}</div>
               </td>
-              <td style="font-size:.8rem;">
+              <td class="d-none d-sm-table-cell">{{ c.title|truncatechars:35 }}</td>
+              <td>
+                <span class="status-badge badge-{{ c.status_badge_class }}" style="font-size:.68rem;">{{ c.get_status_display }}</span>
+              </td>
+              <td style="font-size:.78rem;white-space:nowrap;">
                 {% if c.days_until_expiry is not None %}
                   {% if c.days_until_expiry < 0 %}
-                    <span class="text-danger">Expired</span>
+                    <span class="text-danger">Exp.</span>
                   {% elif c.days_until_expiry <= 7 %}
                     <span class="text-danger fw-600">{{ c.days_until_expiry }}d</span>
                   {% elif c.days_until_expiry <= 30 %}

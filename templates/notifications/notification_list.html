@@ -37,28 +37,28 @@
     {% for notif in page_obj %}
     <li class="list-group-item notification-item {% if notif.status == 'UNREAD' %}unread{% endif %}"
         style="{% if notif.status == 'UNREAD' %}background:rgba(129,140,248,.1);border-left:2px solid rgba(129,140,248,.5);{% else %}background:transparent;{% endif %}border-bottom:1px solid rgba(255,255,255,.05);">
-      <div class="d-flex align-items-start gap-3 py-1">
-        <div style="width:8px;height:8px;border-radius:50%;background:{% if notif.status == 'UNREAD' %}#818cf8{% else %}transparent{% endif %};margin-top:6px;flex-shrink:0;{% if notif.status == 'UNREAD' %}box-shadow:0 0 6px rgba(129,140,248,.6);{% endif %}"></div>
-        <div class="flex-grow-1">
-          <div class="d-flex justify-content-between align-items-start flex-wrap gap-1">
-            <strong style="font-size:.9rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">{{ notif.title }}</strong>
-            <small class="text-muted ms-2 flex-shrink-0" style="font-size:.75rem;">{{ notif.created_at|date:"d M Y H:i" }}</small>
+      <div class="d-flex align-items-start gap-2 py-1">
+        <div style="width:7px;height:7px;border-radius:50%;background:{% if notif.status == 'UNREAD' %}#818cf8{% else %}transparent{% endif %};margin-top:7px;flex-shrink:0;{% if notif.status == 'UNREAD' %}box-shadow:0 0 6px rgba(129,140,248,.6);{% endif %}"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.25rem;">
+            <strong style="font-size:.875rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;">{{ notif.title }}</strong>
+            <small class="text-muted flex-shrink-0" style="font-size:.72rem;">{{ notif.created_at|date:"d M Y" }}</small>
           </div>
-          <p class="mb-1 text-muted" style="font-size:.85rem;">{{ notif.message }}</p>
-          <div class="d-flex gap-2 align-items-center flex-wrap mt-1">
+          <p class="mb-1 text-muted" style="font-size:.82rem;">{{ notif.message|truncatechars:80 }}</p>
+          <div class="d-flex gap-1 align-items-center flex-wrap mt-1">
             {% if notif.contract %}
-            <a href="{% url 'contracts:contract_detail' notif.contract.pk %}" class="btn btn-sm btn-outline-primary" style="padding:.15rem .5rem;font-size:.75rem;">
-              View Contract
+            <a href="{% url 'contracts:contract_detail' notif.contract.pk %}" class="btn btn-sm btn-outline-primary" style="padding:.18rem .55rem;font-size:.72rem;">
+              Contract
             </a>
             {% endif %}
             {% if notif.status == 'UNREAD' %}
-            <a href="{% url 'notifications:mark_read' notif.pk %}" class="mark-read-btn btn btn-sm btn-outline-secondary" data-url="{% url 'notifications:mark_read' notif.pk %}" style="padding:.15rem .5rem;font-size:.75rem;">
-              Mark Read
+            <a href="{% url 'notifications:mark_read' notif.pk %}" class="mark-read-btn btn btn-sm btn-outline-secondary" data-url="{% url 'notifications:mark_read' notif.pk %}" style="padding:.18rem .55rem;font-size:.72rem;">
+              Read
             </a>
             {% endif %}
             <form method="POST" action="{% url 'notifications:archive_notification' notif.pk %}" class="d-inline">
               {% csrf_token %}
-              <button class="btn btn-sm btn-outline-danger" style="padding:.15rem .5rem;font-size:.75rem;">Archive</button>
+              <button class="btn btn-sm btn-outline-danger" style="padding:.18rem .55rem;font-size:.72rem;">Archive</button>
             </form>
           </div>
         </div>

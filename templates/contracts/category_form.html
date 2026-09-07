@@ -11,7 +11,7 @@
     <h1 class="page-title">{{ title }}</h1>
   </div>
 </div>
-<div class="card" style="max-width:500px;">
+<div class="card" >
   <div class="card-body p-4">
     <form method="POST" novalidate>{% csrf_token %}
       <div class="mb-3"><label class="form-label">Name *</label>{{ form.name }}{% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>{% endif %}</div>

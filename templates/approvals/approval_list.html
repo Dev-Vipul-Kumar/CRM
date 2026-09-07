@@ -11,23 +11,30 @@
 </div>
 
 {% if pending_contracts %}
-<div class="card mb-4">
+<div class="card mb-3">
   <div class="card-header">
-    <span class="card-title text-warning"><i class="bi bi-hourglass-split me-1"></i>Pending Your Review</span>
+    <span class="card-title" style="color:var(--warning);"><i class="bi bi-hourglass-split me-1"></i>Pending Your Review</span>
   </div>
   <div class="table-responsive">
     <table class="table mb-0">
-      <thead><tr><th>Contract #</th><th>Title</th><th>Submitted By</th><th>Date</th><th class="text-end">Action</th></tr></thead>
+      <thead><tr>
+        <th>Contract</th>
+        <th class="d-none d-sm-table-cell">Submitted By</th>
+        <th class="d-none d-md-table-cell">Date</th>
+        <th class="text-end">Action</th>
+      </tr></thead>
       <tbody>
         {% for c in pending_contracts %}
         <tr>
-          <td><a href="{% url 'contracts:contract_detail' c.pk %}" class="text-primary fw-600">{{ c.contract_number }}</a></td>
-          <td>{{ c.title|truncatechars:50 }}</td>
-          <td>{{ c.owner.full_name|default:"—" }}</td>
-          <td style="font-size:.8rem;">{{ c.updated_at|date:"d M Y" }}</td>
+          <td>
+            <a href="{% url 'contracts:contract_detail' c.pk %}" class="fw-600" style="color:var(--p1);font-size:.855rem;white-space:nowrap;">{{ c.contract_number }}</a>
+            <div style="font-size:.78rem;color:var(--text-muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.title }}</div>
+          </td>
+          <td class="d-none d-sm-table-cell" style="font-size:.85rem;">{{ c.owner.full_name|default:"—" }}</td>
+          <td class="d-none d-md-table-cell" style="font-size:.8rem;white-space:nowrap;">{{ c.updated_at|date:"d M Y" }}</td>
           <td class="text-end">
             <a href="{% url 'approvals:approval_action' c.pk %}" class="btn btn-sm btn-success">
-              <i class="bi bi-check2-circle me-1"></i>Review
+              <i class="bi bi-check2-circle"></i><span class="d-none d-sm-inline ms-1">Review</span>
             </a>
           </td>
         </tr>
@@ -43,20 +50,28 @@
   <div class="table-responsive">
     <table class="table mb-0">
       <thead>
-        <tr><th>Contract</th><th>Reviewer</th><th>Action</th><th>Comment</th><th>Date</th></tr>
+        <tr>
+          <th>Contract</th>
+          <th class="d-none d-sm-table-cell">Reviewer</th>
+          <th>Action</th>
+          <th class="d-none d-md-table-cell">Comment</th>
+          <th style="white-space:nowrap;">Date</th>
+        </tr>
       </thead>
       <tbody>
         {% for a in page_obj %}
         <tr>
-          <td><a href="{% url 'contracts:contract_detail' a.contract.pk %}" class="text-primary fw-500">{{ a.contract.contract_number }}</a></td>
-          <td>{{ a.reviewer.full_name|default:"—" }}</td>
           <td>
-            <span class="status-badge {% if a.action == 'APPROVED' %}badge-active{% elif a.action == 'REJECTED' %}badge-danger{% elif a.action == 'SUBMITTED' %}badge-info{% else %}badge-warning{% endif %}">
+            <a href="{% url 'contracts:contract_detail' a.contract.pk %}" class="fw-500" style="color:var(--p1);white-space:nowrap;">{{ a.contract.contract_number }}</a>
+          </td>
+          <td class="d-none d-sm-table-cell" style="font-size:.85rem;">{{ a.reviewer.full_name|default:"—"|truncatechars:18 }}</td>
+          <td>
+            <span class="status-badge {% if a.action == 'APPROVED' %}badge-active{% elif a.action == 'REJECTED' %}badge-danger{% elif a.action == 'SUBMITTED' %}badge-info{% else %}badge-warning{% endif %}" style="font-size:.68rem;">
               {{ a.get_action_display }}
             </span>
           </td>
-          <td style="font-size:.85rem;">{{ a.comment|truncatechars:60|default:"—" }}</td>
-          <td style="font-size:.8rem;">{{ a.created_at|date:"d M Y H:i" }}</td>
+          <td class="d-none d-md-table-cell" style="font-size:.82rem;">{{ a.comment|truncatechars:50|default:"—" }}</td>
+          <td style="font-size:.78rem;white-space:nowrap;">{{ a.created_at|date:"d M Y" }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="5" class="text-center py-5 text-muted">No approval history.</td></tr>
