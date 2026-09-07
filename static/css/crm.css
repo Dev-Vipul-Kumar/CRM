@@ -839,8 +839,9 @@ body::before {
 ═══════════════════════════════════════════════════════════ */
 .sidebar-overlay {
   display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.7); z-index: 399;
-  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  background: rgba(0,0,0,.6);
+  z-index: 399;   /* sidebar is z-index:500 on mobile — overlay sits beneath */
+  /* NO backdrop-filter — it blurs the sidebar that slides over it */
 }
 .sidebar-overlay.active { display: block; }
 

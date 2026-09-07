@@ -498,9 +498,9 @@ a:hover { color:var(--ap-p2); }
 .ap-overlay {
   display: none;
   position: fixed; inset: 0;
-  background: rgba(0,0,0,.65);
-  z-index: 499;
-  backdrop-filter: blur(3px);
+  background: rgba(0,0,0,.6);
+  z-index: 499;  /* ap-sidebar is z-index:500 on mobile */
+  /* NO backdrop-filter — it blurs the sidebar above it */
 }
 .ap-overlay.active { display: block; }
 
