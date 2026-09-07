@@ -4,7 +4,8 @@
 
 {% block extra_css %}
 <style>
-  #signature-pad { width: 100%; height: 200px; }
+  #signature-pad { width: 100%; height: 200px; touch-action: none; display: block; }
+  @media (max-width: 576px) { #signature-pad { height: 150px; } }
 </style>
 {% endblock %}
 
@@ -42,7 +43,8 @@
           Draw your signature below. By submitting, you acknowledge that you have read and agree to the contract terms.
         </p>
 
-        <canvas id="signature-pad" width="700" height="200"></canvas>
+        <!-- Canvas: no fixed width attribute — JS sets drawing buffer from CSS size -->
+        <canvas id="signature-pad" height="200"></canvas>
 
         <div class="d-flex gap-2 mt-2 mb-4">
           <button type="button" id="clear-pad" class="btn btn-outline-secondary btn-sm">
@@ -114,6 +116,21 @@
 
 {% block extra_js %}
 <script>
+  // Fix canvas drawing-buffer to match its CSS display size
+  // This ensures touch/mouse coordinates map correctly on all devices
+  function resizeCanvas() {
+    const canvas = document.getElementById('signature-pad');
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width  = Math.round(rect.width  * (window.devicePixelRatio || 1));
+    canvas.height = Math.round(rect.height * (window.devicePixelRatio || 1));
+    const ctx = canvas.getContext('2d');
+    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
   initSignaturePad('signature-pad', 'clear-pad', 'signature_data');
 
   function captureSignature() {

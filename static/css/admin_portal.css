@@ -428,3 +428,85 @@ select option  { background:var(--ap-bg2)!important; color:var(--ap-text)!import
 .badge.bg-primary { background:rgba(129,140,248,.2)!important; color:#a5b4fc!important; }
 a { color:var(--ap-p1); }
 a:hover { color:var(--ap-p2); }
+
+/* ═══════════════════════════════════════════════════════════
+   ADMIN PORTAL RESPONSIVE
+═══════════════════════════════════════════════════════════ */
+
+/* ── Tablet (768–991px) ──────────────────────────────────── */
+@media (max-width: 991px) {
+  .ap-content { padding: 1.1rem; }
+  .ap-action-grid { grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); }
+}
+
+/* ── Mobile (< 768px) ─────────────────────────────────────── */
+@media (max-width: 767px) {
+
+  /* Off-canvas sidebar */
+  .ap-sidebar {
+    transform: translateX(-100%);
+    z-index: 500;
+    width: 260px;
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+  }
+  .ap-sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 32px rgba(0,0,0,.7);
+  }
+  .ap-main { margin-left: 0; }
+
+  /* Topbar */
+  .ap-topbar { padding: 0 .75rem; gap: .4rem; height: auto; min-height: 56px; flex-wrap: wrap; padding-top: .4rem; padding-bottom: .4rem; }
+  .ap-topbar-title { font-size: .85rem; }
+  .ap-topbar-right { flex-wrap: wrap; gap: .3rem; margin-left: auto; }
+  .ap-topbar-btn   { font-size: .72rem; padding: .3rem .55rem; }
+  .ap-logout-btn   { font-size: .72rem; padding: .3rem .55rem; }
+
+  /* Content */
+  .ap-content { padding: .75rem; }
+
+  /* Stat cards */
+  .ap-stat { padding: .8rem .9rem; }
+  .ap-stat-val { font-size: 1.3rem; }
+  .ap-stat-icon { width: 38px; height: 38px; font-size: 1rem; }
+
+  /* Section titles */
+  .ap-section-title { font-size: .64rem; }
+
+  /* Tables */
+  .ap-table { font-size: .77rem; }
+  .ap-table thead th { font-size: .64rem; padding: .5rem .65rem; }
+  .ap-table tbody td { padding: .6rem .65rem; }
+
+  /* Action grid */
+  .ap-action-grid { grid-template-columns: repeat(auto-fill, minmax(100px,1fr)); gap: .65rem; }
+  .ap-action-btn { padding: .85rem .5rem; }
+  .ap-action-btn .icon { width: 38px; height: 38px; font-size: 1rem; }
+  .ap-action-btn .label { font-size: .7rem; }
+
+  /* Buttons */
+  .ap-btn { font-size: .74rem; padding: .3rem .6rem; }
+  .ap-btn-sm { font-size: .68rem; padding: .22rem .45rem; }
+
+  /* Forms */
+  .ap-form-control { font-size: .77rem; padding: .38rem .65rem; }
+
+  /* Overlay for mobile sidebar */
+}
+
+/* Sidebar overlay for portal */
+.ap-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.65);
+  z-index: 499;
+  backdrop-filter: blur(3px);
+}
+.ap-overlay.active { display: block; }
+
+/* ── Extra-small (< 480px) ─────────────────────────────── */
+@media (max-width: 480px) {
+  .ap-action-grid { grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .ap-stat-val { font-size: 1.15rem; }
+  .ap-topbar-right .ap-topbar-btn { padding: .28rem .45rem; }
+}

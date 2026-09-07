@@ -10,7 +10,7 @@
       <li class="breadcrumb-item active">{{ contract.contract_number }}</li>
     </ol></nav>
     <h1 class="page-title">{{ contract.title }}</h1>
-    <div class="d-flex align-items-center gap-2 mt-1">
+    <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
       <code style="font-size:.85rem;">{{ contract.contract_number }}</code>
       <span class="status-badge badge-{{ contract.status_badge_class }}">{{ contract.get_status_display }}</span>
       <span class="status-badge priority-{{ contract.priority|lower }}">{{ contract.get_priority_display }}</span>
@@ -71,7 +71,7 @@
 <div class="row g-4">
 
   <!-- Left: Main info -->
-  <div class="col-lg-8">
+  <div class="col-lg-8 col-md-12">
 
     <div class="card mb-4">
       <div class="card-header"><span class="card-title">Contract Information</span></div>
@@ -173,7 +173,7 @@
     {% if approvals %}
     <div class="card mb-4">
       <div class="card-header"><span class="card-title">Approval History</span></div>
-      <div class="card-body p-0">
+      <div class="table-responsive">
         <table class="table mb-0">
           <thead><tr><th>Reviewer</th><th>Action</th><th>Comment</th><th>Date</th></tr></thead>
           <tbody>
@@ -186,7 +186,7 @@
                 </span>
               </td>
               <td style="font-size:.85rem;">{{ a.comment|default:"—" }}</td>
-              <td style="font-size:.8rem;">{{ a.created_at|date:"d M Y H:i" }}</td>
+              <td style="font-size:.8rem;white-space:nowrap;">{{ a.created_at|date:"d M Y H:i" }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -206,7 +206,7 @@
         </a>
         {% endif %}
       </div>
-      <div class="card-body p-0">
+      <div class="table-responsive">
         <table class="table mb-0">
           <thead><tr><th>Signer</th><th>Status</th><th>Requested</th><th>Signed At</th></tr></thead>
           <tbody>
@@ -218,8 +218,8 @@
                   {{ sig.get_status_display }}
                 </span>
               </td>
-              <td style="font-size:.8rem;">{{ sig.requested_at|date:"d M Y" }}</td>
-              <td style="font-size:.8rem;">{{ sig.signed_at|date:"d M Y H:i"|default:"—" }}</td>
+              <td style="font-size:.8rem;white-space:nowrap;">{{ sig.requested_at|date:"d M Y" }}</td>
+              <td style="font-size:.8rem;white-space:nowrap;">{{ sig.signed_at|date:"d M Y H:i"|default:"—" }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -231,7 +231,7 @@
   </div><!-- /col-lg-8 -->
 
   <!-- Right: Sidebar info -->
-  <div class="col-lg-4">
+  <div class="col-lg-4 col-md-12">
 
     <!-- Current document -->
     <div class="card mb-3">

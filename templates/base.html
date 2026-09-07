@@ -245,6 +245,18 @@
     </div>
     {% endif %}
 
+    <!-- Mobile search — shown only on small screens -->
+    <div class="mobile-search-row">
+      <form style="width:100%;" action="{% url 'contracts:contract_list' %}" method="get">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search" style="font-size:.8rem;"></i></span>
+          <input type="text" name="search" class="form-control"
+                 placeholder="Search contracts…"
+                 value="{{ request.GET.search|default:'' }}">
+        </div>
+      </form>
+    </div>
+
     <!-- Page content — this must be clickable always -->
     <main class="page-content" style="position:relative;z-index:1;">
       {% block content %}{% endblock %}

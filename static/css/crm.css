@@ -950,3 +950,242 @@ a:hover { color: var(--p2); }
 .list-group-item.notification-item strong { color: var(--text-main) !important; }
 .list-group-item.notification-item small  { color: var(--text-muted) !important; }
 .list-group-item.notification-item p      { color: var(--text-muted) !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   FULL RESPONSIVE SYSTEM
+   Breakpoints: xs <576  sm 576+  md 768+  lg 992+  xl 1200+
+═══════════════════════════════════════════════════════════ */
+
+/* ── Tablet (md 768–991) ───────────────────────────────── */
+@media (max-width: 991px) {
+  /* Two-column layouts switch at lg — add md fallback */
+  .col-lg-8, .col-lg-7 { flex: 0 0 100%; max-width: 100%; width: 100%; }
+  .col-lg-4, .col-lg-5 { flex: 0 0 100%; max-width: 100%; width: 100%; }
+
+  /* Reports three-col → two-col on tablet */
+  .col-lg-6  { flex: 0 0 100%; max-width: 100%; width: 100%; }
+  .col-lg-3  { flex: 0 0 50%;  max-width: 50%;  width: 50%; }
+
+  /* Page content padding */
+  .page-content { padding: 1.25rem; }
+
+  /* Stat card values slightly smaller */
+  .stat-value { font-size: 1.55rem; }
+}
+
+/* ── Mobile (< 768px) ───────────────────────────────────── */
+@media (max-width: 767px) {
+
+  /* ── Sidebar off-canvas ── */
+  .sidebar {
+    transform: translateX(-100%);
+    z-index: 500;
+    width: 260px;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 32px rgba(0,0,0,.7);
+  }
+  .main-area { margin-left: 0; }
+
+  /* ── Topbar ── */
+  .topbar { padding: 0 .85rem; gap: .5rem; }
+  .topbar-search { display: none !important; }   /* hidden on mobile — search accessible via contracts list */
+  .topbar-divider { display: none; }
+  .topbar-actions { gap: .35rem; }
+
+  /* Mobile search row below topbar */
+  .mobile-search-row {
+    display: flex !important;
+    padding: .6rem .85rem;
+    background: rgba(13,17,23,.9);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Page content ── */
+  .page-content { padding: .85rem; }
+
+  /* ── Page header ── */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .75rem;
+  }
+  .page-header > div:last-child,
+  .page-header > .d-flex {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+
+  /* Page title */
+  .page-title { font-size: 1.15rem; }
+
+  /* ── Cards ── */
+  .card { border-radius: 10px; }
+
+  /* ── Stat cards ── */
+  .stat-card { padding: .9rem; gap: .75rem; }
+  .stat-icon  { width: 40px; height: 40px; font-size: 1.05rem; }
+  .stat-value { font-size: 1.4rem; }
+  .stat-label { font-size: .72rem; }
+
+  /* ── Tables — font reduction for small screens ── */
+  .table { font-size: .8rem; }
+  .table thead th { font-size: .67rem; padding: .6rem .75rem; }
+  .table tbody td { padding: .65rem .75rem; }
+
+  /* ── Buttons ── */
+  .btn { font-size: .82rem; padding: .45rem .9rem; }
+  .btn-sm { font-size: .75rem; padding: .28rem .6rem; }
+
+  /* ── Forms ── */
+  .form-control, .form-select { font-size: .855rem; padding: .5rem .8rem; }
+
+  /* ── Badge row — allow wrapping ── */
+  .d-flex.align-items-center.gap-2 { flex-wrap: wrap; }
+
+  /* ── All d-flex without explicit flex-wrap — add wrap on mobile ── */
+  .page-header .d-flex    { flex-wrap: wrap; }
+  .card-header            { flex-wrap: wrap; gap: .5rem; }
+  .card-header .d-flex    { flex-wrap: wrap; }
+
+  /* ── Breadcrumbs truncate ── */
+  .breadcrumb { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── Filter forms — stack 2-per-row on mobile ── */
+  .filter-form .col-md-1,
+  .filter-form .col-md-2,
+  .filter-form .col-md-3,
+  .filter-form .col-md-4 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    width: 50%;
+  }
+  .filter-form .col-auto {
+    flex: 0 0 100%;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* ── Notification item ── */
+  .notification-item .d-flex.justify-content-between { flex-wrap: wrap; gap: .25rem; }
+  .notification-item strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .notification-item .d-flex.gap-2.align-items-center { flex-wrap: wrap; }
+
+  /* ── dl rows on mobile — stack labels + values ── */
+  .dl-row-mobile dt, .dl-row-mobile dd { flex: 0 0 100%; max-width: 100%; }
+
+  /* ── Login card ── */
+  .login-card { padding: 1.75rem 1.25rem; margin: 1rem; max-width: 100%; }
+
+  /* ── Signature pad canvas ── */
+  #signature-pad { height: 160px; }
+
+  /* ── Timeline ── */
+  .timeline-item { padding-left: 2.5rem; }
+  .timeline::before { left: 12px; }
+  .timeline-dot { left: 5px; width: 13px; height: 13px; }
+
+  /* ── Admin portal inside portal.html ── */
+  .ap-main { margin-left: 0; }
+  .ap-sidebar { transform: translateX(-100%); z-index: 500; }
+  .ap-sidebar.open { transform: translateX(0); }
+
+  /* ── Reports layout: all full-width on mobile ── */
+  .col-lg-3 { flex: 0 0 100%; max-width: 100%; width: 100%; }
+
+  /* ── User actions wrap ── */
+  .page-header .d-flex.gap-2 { flex-wrap: wrap; }
+}
+
+/* ── Extra-small (< 480px) ─────────────────────────────── */
+@media (max-width: 480px) {
+  :root { --topbar-height: 56px; }
+
+  .topbar { height: 56px; }
+  .page-content { padding: .65rem; }
+  .stat-value { font-size: 1.25rem; }
+  .stat-card  { padding: .75rem; gap: .6rem; }
+  .stat-icon  { width: 36px; height: 36px; font-size: .95rem; }
+
+  /* Stat grids: always 2 per row */
+  .col-6 { flex: 0 0 50%; max-width: 50%; }
+
+  /* Filter forms: full-width stacked */
+  .filter-form .col-md-1,
+  .filter-form .col-md-2,
+  .filter-form .col-md-3,
+  .filter-form .col-md-4 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .btn { font-size: .78rem; }
+  .table { font-size: .75rem; }
+  .table thead th { font-size: .62rem; padding: .5rem .55rem; }
+  .table tbody td { padding: .55rem .55rem; }
+
+  .page-title { font-size: 1rem; }
+  .page-subtitle { font-size: .78rem; }
+
+  .login-card { padding: 1.5rem 1rem; }
+}
+
+/* ── Admin portal specific responsive ─────────────────── */
+@media (max-width: 767px) {
+  .ap-topbar-right {
+    flex-wrap: wrap;
+    gap: .3rem;
+  }
+  .ap-topbar-right .ap-topbar-btn,
+  .ap-topbar-right .ap-logout-btn {
+    font-size: .72rem;
+    padding: .32rem .6rem;
+  }
+  /* hide text labels in topbar on very small screens */
+  .ap-topbar-right .ap-topbar-btn span,
+  .ap-topbar-right .ap-logout-btn span { display: none; }
+
+  .ap-content { padding: .85rem; }
+  .ap-action-grid { grid-template-columns: repeat(auto-fill, minmax(110px,1fr)); gap: .7rem; }
+  .ap-stat { padding: .85rem .9rem; }
+  .ap-stat-val { font-size: 1.35rem; }
+
+  /* Section header buttons: let them wrap */
+  .d-flex.align-items-center.justify-content-between { flex-wrap: wrap; gap: .5rem; }
+}
+
+/* ── Table responsive forced on ALL inner tables ─────── */
+/* Ensures no table ever overflows its container */
+.card-body table:not(.ap-table),
+.card > table:not(.ap-table) {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Mobile search bar (visible on mobile) ─────────────── */
+.mobile-search-row { display: none; }
+
+@media (max-width: 767px) {
+  .mobile-search-row {
+    display: flex;
+    padding: .55rem .85rem;
+    background: rgba(13,17,23,.95);
+    border-bottom: 1px solid var(--border);
+    gap: .5rem;
+  }
+  .mobile-search-row .form-control {
+    background: var(--bg4) !important;
+    border-color: rgba(255,255,255,.1) !important;
+    font-size: .855rem;
+    color: var(--text-main) !important;
+  }
+  .mobile-search-row .input-group-text {
+    background: var(--bg4) !important;
+    border-color: rgba(255,255,255,.1) !important;
+    color: var(--text-muted) !important;
+  }
+}
